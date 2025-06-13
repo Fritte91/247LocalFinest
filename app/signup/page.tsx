@@ -15,7 +15,8 @@ export default function SignupPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     dateOfBirth: "",
@@ -50,12 +51,13 @@ export default function SignupPage() {
     return age
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors = {}
 
     // Validation
-    if (!formData.name) newErrors.name = "Full name is required"
+    if (!formData.firstName) newErrors.firstName = "First name is required"
+    if (!formData.lastName) newErrors.lastName = "Last name is required"
     if (!formData.email) newErrors.email = "Email is required"
     if (!formData.phone) newErrors.phone = "Phone number is required"
     if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required"
@@ -88,16 +90,18 @@ export default function SignupPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: formData.name,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
-          phone: formData.phone,
+          phoneNumber: formData.phone,
+          dateOfBirth: formData.dateOfBirth,
           address: {
             street: formData.address,
             city: formData.city,
@@ -107,22 +111,20 @@ export default function SignupPage() {
         }),
       })
 
-      const data = await response.json()
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create account')
+        const data = await response.json()
+        throw new Error(data.error || "Failed to sign up")
       }
 
       toast({
         title: "Success",
-        description: "Account created successfully! Please sign in.",
+        description: "Account created successfully",
       })
-
-      router.push('/signin')
+      router.push("/signin")
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Failed to sign up",
         variant: "destructive",
       })
     } finally {
@@ -181,22 +183,41 @@ export default function SignupPage() {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="name" className="text-sage-300 font-medium">
-                        Full Name *
+                      <Label htmlFor="firstName" className="text-sage-300 font-medium">
+                        First Name *
                       </Label>
                       <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
+                        id="firstName"
+                        value={formData.firstName}
+                        onChange={(e) => handleInputChange("firstName", e.target.value)}
                         className={`mt-2 bg-black border-sage-700 text-white h-12 ${
-                          errors.name ? "border-red-500" : ""
+                          errors.firstName ? "border-red-500" : ""
                         }`}
-                        placeholder="Enter your full name"
+                        placeholder="Enter your first name"
                         disabled={isLoading}
                       />
-                      {errors.name && <p className="text-red-400 text-sm mt-2">{errors.name}</p>}
+                      {errors.firstName && <p className="text-red-400 text-sm mt-2">{errors.firstName}</p>}
                     </div>
 
+                    <div>
+                      <Label htmlFor="lastName" className="text-sage-300 font-medium">
+                        Last Name *
+                      </Label>
+                      <Input
+                        id="lastName"
+                        value={formData.lastName}
+                        onChange={(e) => handleInputChange("lastName", e.target.value)}
+                        className={`mt-2 bg-black border-sage-700 text-white h-12 ${
+                          errors.lastName ? "border-red-500" : ""
+                        }`}
+                        placeholder="Enter your last name"
+                        disabled={isLoading}
+                      />
+                      {errors.lastName && <p className="text-red-400 text-sm mt-2">{errors.lastName}</p>}
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <Label htmlFor="email" className="text-sage-300 font-medium">
                         Email Address *
@@ -217,9 +238,7 @@ export default function SignupPage() {
                       </div>
                       {errors.email && <p className="text-red-400 text-sm mt-2">{errors.email}</p>}
                     </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <Label htmlFor="phone" className="text-sage-300 font-medium">
                         Phone Number *
@@ -240,26 +259,26 @@ export default function SignupPage() {
                       </div>
                       {errors.phone && <p className="text-red-400 text-sm mt-2">{errors.phone}</p>}
                     </div>
+                  </div>
 
-                    <div>
-                      <Label htmlFor="dateOfBirth" className="text-sage-300 font-medium">
-                        Date of Birth *
-                      </Label>
-                      <div className="relative mt-2">
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sage-400 h-5 w-5" />
-                        <Input
-                          id="dateOfBirth"
-                          type="date"
-                          value={formData.dateOfBirth}
-                          onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                          className={`pl-12 bg-black border-sage-700 text-white h-12 ${
-                            errors.dateOfBirth ? "border-red-500" : ""
-                          }`}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      {errors.dateOfBirth && <p className="text-red-400 text-sm mt-2">{errors.dateOfBirth}</p>}
+                  <div>
+                    <Label htmlFor="dateOfBirth" className="text-sage-300 font-medium">
+                      Date of Birth *
+                    </Label>
+                    <div className="relative mt-2">
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sage-400 h-5 w-5" />
+                      <Input
+                        id="dateOfBirth"
+                        type="date"
+                        value={formData.dateOfBirth}
+                        onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                        className={`pl-12 bg-black border-sage-700 text-white h-12 ${
+                          errors.dateOfBirth ? "border-red-500" : ""
+                        }`}
+                        disabled={isLoading}
+                      />
                     </div>
+                    {errors.dateOfBirth && <p className="text-red-400 text-sm mt-2">{errors.dateOfBirth}</p>}
                   </div>
 
                   <div>
