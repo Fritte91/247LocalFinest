@@ -5,9 +5,9 @@ import User from '@/models/User';
 
 export async function POST(request: Request) {
   try {
-    const { firstName, lastName, email, password, phoneNumber, dateOfBirth, role = 'user' } = await request.json();
+    const { firstName, lastName, email, password, phoneNumber, dateOfBirth, address, role = 'user' } = await request.json();
 
-    if (!firstName || !lastName || !email || !password || !phoneNumber || !dateOfBirth) {
+    if (!firstName || !lastName || !email || !password || !phoneNumber || !dateOfBirth || !address) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user with only required fields
+    // Create user with all required fields
     const user = await User.create({
       firstName,
       lastName,
@@ -36,6 +36,7 @@ export async function POST(request: Request) {
       password: hashedPassword,
       phoneNumber,
       dateOfBirth,
+      address,
       role,
     });
 
@@ -45,8 +46,21 @@ export async function POST(request: Request) {
     return NextResponse.json(userWithoutPassword, { status: 201 });
   } catch (error) {
     console.error('Registration error:', error);
+    // Log the full error details in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Full error details:', {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name
+      });
+    }
     return NextResponse.json(
-      { error: 'Failed to create user', details: error?.message || error, stack: error?.stack || '' },
+      { 
+        error: 'Failed to create user', 
+        details: error?.message || 'Unknown error occurred',
+        // Only include stack trace in development
+        ...(process.env.NODE_ENV === 'development' ? { stack: error?.stack } : {})
+      },
       { status: 500 }
     );
   }
