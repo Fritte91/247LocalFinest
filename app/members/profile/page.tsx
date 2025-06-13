@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Leaf, User, MapPin, Phone, Mail, Calendar, Edit, Save, X, Package, Star, Shield } from "lucide-react"
 import { useApp } from "@/lib/context"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
   const { isAdmin } = useApp()
@@ -29,6 +31,27 @@ export default function ProfilePage() {
   })
 
   const [editData, setEditData] = useState({ ...profileData })
+
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/signin")
+    }
+  }, [status, router])
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
+  }
 
   const handleSave = () => {
     setProfileData({ ...editData })

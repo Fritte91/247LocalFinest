@@ -13,6 +13,8 @@ import { Progress } from "@/components/ui/progress"
 import { Leaf, Search, ShoppingCart, Star, User, Grid, List, Filter, Clock, Award, MapPin, Heart } from "lucide-react"
 import type { ChangeEvent, MouseEvent } from "react"
 import { useApp } from "@/lib/context"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 // Define types for products
 interface Grower {
@@ -60,6 +62,9 @@ export default function MembersShop() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
   const categories = {
     all: { name: "All Products", subcategories: [] },
     flowers: {
@@ -89,6 +94,12 @@ export default function MembersShop() {
   }
 
   const { addToCart, cart } = useApp()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/signin")
+    }
+  }, [status, router])
 
   useEffect(() => {
     async function fetchProducts() {
@@ -410,6 +421,18 @@ export default function MembersShop() {
         </DialogContent>
       </Dialog>
     )
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
