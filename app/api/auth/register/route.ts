@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user with only required fields
     const user = await User.create({
       firstName,
       lastName,
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(
-      { error: 'Failed to create user', details: error?.message || error },
+      { error: 'Failed to create user', details: error?.message || error, stack: error?.stack || '' },
       { status: 500 }
     );
   }

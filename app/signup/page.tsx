@@ -53,42 +53,23 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const newErrors = {}
-
-    // Validation
-    if (!formData.firstName) newErrors.firstName = "First name is required"
-    if (!formData.lastName) newErrors.lastName = "Last name is required"
-    if (!formData.email) newErrors.email = "Email is required"
-    if (!formData.phone) newErrors.phone = "Phone number is required"
-    if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required"
-    if (!formData.address) newErrors.address = "Address is required"
-    if (!formData.city) newErrors.city = "City is required"
-    if (!formData.state) newErrors.state = "State is required"
-    if (!formData.zipCode) newErrors.zipCode = "Zip code is required"
-    if (!formData.password) newErrors.password = "Password is required"
-    if (!formData.confirmPassword) newErrors.confirmPassword = "Confirm password is required"
-    if (!formData.agreeTerms) newErrors.agreeTerms = "You must agree to the terms"
-    if (!formData.ageVerified) newErrors.ageVerified = "Age verification is required"
-
-    // Age validation
-    if (formData.dateOfBirth) {
-      const age = validateAge(formData.dateOfBirth)
-      if (age < 21) {
-        newErrors.dateOfBirth = "You must be 21 or older to access our services"
-      }
-    }
-
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      })
       return
     }
-
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.phone || !formData.dateOfBirth || !formData.address) {
+      toast({
+        title: "Error",
+        description: "All fields are required",
+        variant: "destructive",
+      })
+      return
+    }
     setIsLoading(true)
-
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -102,20 +83,13 @@ export default function SignupPage() {
           password: formData.password,
           phoneNumber: formData.phone,
           dateOfBirth: formData.dateOfBirth,
-          address: {
-            street: formData.address,
-            city: formData.city,
-            state: formData.state,
-            zipCode: formData.zipCode,
-          },
+          address: formData.address
         }),
       })
-
       if (!response.ok) {
         const data = await response.json()
         throw new Error(data.error || "Failed to sign up")
       }
-
       toast({
         title: "Success",
         description: "Account created successfully",
@@ -331,21 +305,17 @@ export default function SignupPage() {
                     <h3 className="text-xl font-semibold text-white">Address Information</h3>
                   </div>
 
-                  <div>
-                    <Label htmlFor="address" className="text-sage-300 font-medium">
-                      Street Address *
-                    </Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="text-sage-300">Address</Label>
                     <Input
                       id="address"
+                      name="address"
+                      type="text"
+                      required
                       value={formData.address}
                       onChange={(e) => handleInputChange("address", e.target.value)}
-                      className={`mt-2 bg-black border-sage-700 text-white h-12 ${
-                        errors.address ? "border-red-500" : ""
-                      }`}
-                      placeholder="123 Main Street"
-                      disabled={isLoading}
+                      className="bg-sage-900 border-sage-700 text-white"
                     />
-                    {errors.address && <p className="text-red-400 text-sm mt-2">{errors.address}</p>}
                   </div>
 
                   <div className="grid md:grid-cols-3 gap-6">

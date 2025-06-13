@@ -1,6 +1,16 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: [true, 'First name is required'],
+    trim: true,
+  },
+  lastName: {
+    type: String,
+    required: [true, 'Last name is required'],
+    trim: true,
+  },
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -12,28 +22,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Password is required'],
   },
-  firstName: {
-    type: String,
-    required: [true, 'First name is required'],
-    trim: true,
-  },
-  lastName: {
-    type: String,
-    required: [true, 'Last name is required'],
-    trim: true,
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
-  },
-  address: {
-    street: String,
-    city: String,
-    state: String,
-    zipCode: String,
-  },
-  phone: String,
   phoneNumber: {
     type: String,
     required: [true, 'Phone number is required'],
@@ -41,6 +29,16 @@ const userSchema = new mongoose.Schema({
   dateOfBirth: {
     type: Date,
     required: [true, 'Date of birth is required'],
+  },
+  address: {
+    type: String,
+    required: [true, 'Address is required'],
+    trim: true,
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
   },
   createdAt: {
     type: Date,
