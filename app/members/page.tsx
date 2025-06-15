@@ -13,6 +13,9 @@ import { Progress } from "@/components/ui/progress"
 import { Leaf, Search, ShoppingCart, Star, User, Grid, List, Filter, Clock, Award, MapPin, Heart } from "lucide-react"
 import type { ChangeEvent, MouseEvent } from "react"
 import { useApp } from "@/lib/context"
+import { toast } from "sonner"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
+import { SizeGuide } from "@/components/ui/size-guide"
 
 // Define types for products
 interface Grower {
@@ -51,10 +54,29 @@ interface Product {
   edition?: string;
 }
 
+const ProductSkeleton = () => {
+  return (
+    <Card className="bg-sage-950/70 border-sage-800/70 overflow-hidden">
+      <div className="relative">
+        <div className="w-full h-64 bg-sage-900/50 animate-pulse" />
+      </div>
+      <div className="p-6">
+        <div className="h-6 w-3/4 bg-sage-900/50 rounded animate-pulse mb-3" />
+        <div className="h-4 w-full bg-sage-900/50 rounded animate-pulse mb-2" />
+        <div className="h-4 w-2/3 bg-sage-900/50 rounded animate-pulse mb-5" />
+        <div className="flex justify-between items-center">
+          <div className="h-8 w-24 bg-sage-900/50 rounded animate-pulse" />
+          <div className="h-10 w-32 bg-sage-900/50 rounded animate-pulse" />
+        </div>
+      </div>
+    </Card>
+  )
+}
+
 export default function MembersShop() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [selectedSubCategory, setSelectedSubCategory] = useState("all")
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof categories>("all")
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all")
   const [viewMode, setViewMode] = useState("grid")
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [products, setProducts] = useState<Product[]>([])
@@ -88,7 +110,7 @@ export default function MembersShop() {
     },
   }
 
-  const { addToCart, cart } = useApp()
+  const { addToCart, cart, addToWishlist, removeFromWishlist, isInWishlist } = useApp()
 
   useEffect(() => {
     async function fetchProducts() {
@@ -144,7 +166,7 @@ export default function MembersShop() {
   })
 
   const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category)
+    setSelectedCategory(category as keyof typeof categories)
     setSelectedSubCategory("all")
   }
 
@@ -191,7 +213,7 @@ export default function MembersShop() {
                   alt={product.name}
                   width={400}
                   height={400}
-                  className="w-full h-80 object-cover hover:scale-105 transition-transform duration-500"
+                  className="w-full h-80 object-contain hover:scale-105 transition-transform duration-500"
                 />
                 {product.lowStock && (
                   <Badge className="absolute top-3 right-3 bg-gold-600 text-white">
@@ -215,7 +237,7 @@ export default function MembersShop() {
                         alt={`${product.name} ${index + 2}`}
                         width={120}
                         height={120}
-                        className="w-full h-24 object-cover"
+                        className="w-full h-24 object-contain"
                       />
                     </div>
                   ))}
@@ -395,6 +417,44 @@ export default function MembersShop() {
                 </div>
               )}
 
+              {product.category === "glassware" && (
+                <div className="mt-6">
+                  <SizeGuide />
+                </div>
+              )}
+
+              <div className="absolute top-0 right-0 z-10 p-2">
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className={`rounded-full h-8 w-8 bg-black/40 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 ${
+                    isInWishlist(product.id) 
+                      ? "text-red-400 hover:text-red-300 hover:bg-red-900/60" 
+                      : "text-sage-300 hover:text-white hover:bg-forest-700/60"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isInWishlist(product.id)) {
+                      removeFromWishlist(product.id);
+                      toast.success("Removed from wishlist");
+                    } else {
+                      addToWishlist({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.images?.[0] || "",
+                        category: product.category,
+                        grower: product.grower?.name,
+                        artist: product.artist
+                      });
+                      toast.success("Added to wishlist");
+                    }
+                  }}
+                >
+                  <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-current" : ""}`} />
+                </Button>
+              </div>
+
               <Button
                 className={`w-full mt-6 ${product.inStock > 0 ? "premium-gradient" : "bg-gray-600"} text-white py-4 text-lg hover:shadow-lg hover:shadow-forest-900/30 transition-all duration-300`}
                 disabled={product.inStock === 0}
@@ -454,6 +514,16 @@ export default function MembersShop() {
       </header>
 
       <div className="container mx-auto px-4 py-12">
+        {/* Breadcrumbs */}
+        <div className="mb-6">
+          <Breadcrumbs
+            items={[
+              { label: "Shop", href: "/members" },
+              { label: selectedCategory !== "all" ? categories[selectedCategory].name : "All Products" }
+            ]}
+          />
+        </div>
+
         {/* Hero Banner */}
         <div className="mb-12 relative overflow-hidden rounded-2xl bg-gradient-to-r from-forest-900 to-sage-900">
           <div className="absolute inset-0 opacity-20 bg-grid"></div>
@@ -522,7 +592,7 @@ export default function MembersShop() {
           </Tabs>
 
           {/* Subcategory Navigation - Improved Integration */}
-          {selectedCategory !== "all" && categories[selectedCategory]?.subcategories.length > 0 && (
+          {selectedCategory !== "all" && categories[selectedCategory].subcategories.length > 0 && (
             <div className="my-6">
               <div className="bg-sage-950/50 backdrop-blur-sm border border-sage-800/50 rounded-xl p-6 shadow-lg">
                 <div className="flex items-center gap-3 mb-4">
@@ -595,154 +665,98 @@ export default function MembersShop() {
 
         {/* Product Grid */}
         <div className={viewMode === "grid" ? "grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" : "space-y-6"}>
-          {filteredProducts.map((product) => (
-            <Card
-              key={product.id}
-              className={`bg-sage-950/70 border-sage-800/70 hover:border-forest-600 hover:shadow-xl hover:shadow-forest-900/10 transition-all duration-300 overflow-hidden group cursor-pointer backdrop-blur-sm ${
-                viewMode === "list" ? "flex flex-row" : ""
-              }`}
-              onClick={() => setSelectedProduct(product)}
-            >
-              <div className={viewMode === "list" ? "w-56 flex-shrink-0 relative" : "relative"}>
-                <div className="absolute top-0 right-0 z-10 p-2">
-                  <Button size="icon" variant="ghost" className="rounded-full h-8 w-8 bg-black/40 backdrop-blur-sm text-sage-300 hover:text-white hover:bg-forest-700/60 transition-colors duration-300">
-                    <Heart className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="overflow-hidden">
-                  <Image
-                    src={product.images?.[0] || "/placeholder.svg"}
-                    alt={product.name}
-                    width={300}
-                    height={300}
-                    className={`object-cover transition-all duration-500 group-hover:scale-110 ${
-                      viewMode === "list" ? "w-full h-56" : "w-full h-64"
-                    }`}
-                  />
-                </div>
-                {product.lowStock && (
-                  <Badge className="absolute top-3 right-3 bg-gold-600 text-white shadow-lg shadow-gold-900/30 animate-pulse">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Low Stock!
-                  </Badge>
-                )}
-                {!product.inStock && (
-                  <Badge className="absolute top-3 right-3 bg-red-600 text-white shadow-lg shadow-red-900/30">Out of Stock</Badge>
-                )}
-                <Badge className="absolute top-3 left-3 premium-gradient text-white capitalize shadow-lg shadow-forest-900/30 backdrop-blur-sm">
-                  {product.category}
-                </Badge>
-              </div>
-
-              <div className={`p-6 ${viewMode === "list" ? "flex-1" : ""}`}>
-                <div className="flex justify-between items-start mb-3">
-                  <CardTitle className="text-white font-display text-xl group-hover:text-forest-400 transition-colors duration-300">{product.name}</CardTitle>
-                  <div className="flex items-center gap-1 bg-sage-900/60 px-2 py-1 rounded-md backdrop-blur-sm">
-                    <Star className="h-4 w-4 fill-gold-400 text-gold-400" />
-                    <span className="text-sm font-medium text-white">{product.rating}</span>
-                  </div>
-                </div>
-
-                <CardDescription className="text-sage-300 mb-5 line-clamp-2 group-hover:text-sage-200 transition-colors duration-300">{product.description}</CardDescription>
-
-                {product.category === "flowers" && (
-                  <div className="flex gap-2 mb-5 flex-wrap">
-                    <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs px-3 py-1 rounded-md">
-                      THC: {product.thc}%
-                    </Badge>
-                    <Badge variant="outline" className="border-sage-500 text-sage-400 text-xs px-3 py-1 rounded-md">
-                      CBD: {product.cbd}%
-                    </Badge>
-                    <Badge variant="outline" className="border-gold-500 text-gold-400 text-xs px-3 py-1 rounded-md">
-                      {product.strain}
-                    </Badge>
-                  </div>
-                )}
-
-                {(product.category === "glassware" || product.category === "artwork") && (
-                  <p className="text-sm text-gold-400 mb-5">By {product.artist}</p>
-                )}
-
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-white">${product.price}</span>
-                  <Button
-                    className={product.inStock > 0 ? "premium-gradient shadow-lg shadow-forest-900/20 hover:shadow-xl hover:shadow-forest-900/30 transition-all duration-300" : "bg-gray-700"}
-                    disabled={product.inStock === 0}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      addToCartHandler(product)
-                    }}
-                  >
-                    {product.inStock > 0 ? "Add to Cart" : "Out of Stock"}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-20 bg-sage-950/30 backdrop-blur-sm border border-sage-800/50 rounded-xl my-12">
-            <div className="flex flex-col items-center gap-4">
-              <div className="h-16 w-16 rounded-full bg-sage-900/80 flex items-center justify-center mb-2">
-                <Filter className="h-8 w-8 text-sage-500" />
-              </div>
-              <p className="text-sage-300 text-xl mb-4">No products found matching your criteria.</p>
-              <Button
-                className="premium-gradient text-white px-8 py-6 text-lg shadow-lg shadow-forest-900/20 hover:shadow-xl hover:shadow-forest-900/30 transition-all duration-300"
-                onClick={() => {
-                  setSearchQuery("")
-                  setSelectedCategory("all")
-                  setSelectedSubCategory("all")
-                }}
+          {loading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <ProductSkeleton key={index} />
+            ))
+          ) : (
+            filteredProducts.map((product) => (
+              <Card
+                key={product.id}
+                className={`bg-sage-950/70 border-sage-800/70 hover:border-forest-600 hover:shadow-xl hover:shadow-forest-900/10 transition-all duration-300 overflow-hidden group cursor-pointer backdrop-blur-sm ${
+                  viewMode === "list" ? "flex flex-row" : ""
+                }`}
+                onClick={() => setSelectedProduct(product)}
               >
-                Clear Filters
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
+                <div className={viewMode === "list" ? "w-56 flex-shrink-0 relative" : "relative"}>
+                  <div className="absolute top-0 right-0 z-10 p-2">
+                    <Button size="icon" variant="ghost" className="rounded-full h-8 w-8 bg-black/40 backdrop-blur-sm text-sage-300 hover:text-white hover:bg-forest-700/60 transition-colors duration-300">
+                      <Heart className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="overflow-hidden">
+                    <Image
+                      src={product.images?.[0] || "/placeholder.svg"}
+                      alt={product.name}
+                      width={300}
+                      height={300}
+                      className={`object-contain transition-all duration-500 group-hover:scale-110 ${
+                        viewMode === "list" ? "w-full h-56" : "w-full h-64"
+                      }`}
+                    />
+                  </div>
+                  {product.lowStock && (
+                    <Badge className="absolute top-3 right-3 bg-gold-600 text-white shadow-lg shadow-gold-900/30 animate-pulse">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Low Stock!
+                    </Badge>
+                  )}
+                  {!product.inStock && (
+                    <Badge className="absolute top-3 right-3 bg-red-600 text-white shadow-lg shadow-red-900/30">Out of Stock</Badge>
+                  )}
+                  <Badge className="absolute top-3 left-3 premium-gradient text-white capitalize shadow-lg shadow-forest-900/30 backdrop-blur-sm">
+                    {product.category}
+                  </Badge>
+                </div>
 
-      <style jsx>{`
-        .bg-grid {
-          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(148 163 184 / 0.1)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
-        }
-        
-        @keyframes fadeInDown {
-          from { opacity: 0; transform: translateY(-20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        .animate-fade-in-down {
-          animation: fadeInDown 0.8s ease forwards;
-        }
-        
-        .animate-fade-in-up {
-          animation: fadeInUp 0.8s ease forwards;
-        }
-        
-        .animate-fade-in {
-          animation: fadeIn 0.8s ease forwards;
-        }
-        
-        .animation-delay-300 {
-          animation-delay: 0.3s;
-        }
-        
-        .animation-delay-500 {
-          animation-delay: 0.5s;
-        }
-      `}</style>
+                <div className={`p-6 ${viewMode === "list" ? "flex-1" : ""}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <CardTitle className="text-white font-display text-xl group-hover:text-forest-400 transition-colors duration-300">{product.name}</CardTitle>
+                    <div className="flex items-center gap-1 bg-sage-900/60 px-2 py-1 rounded-md backdrop-blur-sm">
+                      <Star className="h-4 w-4 fill-gold-400 text-gold-400" />
+                      <span className="text-sm font-medium text-white">{product.rating}</span>
+                    </div>
+                  </div>
+
+                  <CardDescription className="text-sage-300 mb-5 line-clamp-2 group-hover:text-sage-200 transition-colors duration-300">{product.description}</CardDescription>
+
+                  {product.category === "flowers" && (
+                    <div className="flex gap-2 mb-5 flex-wrap">
+                      <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs px-3 py-1 rounded-md">
+                        THC: {product.thc}%
+                      </Badge>
+                      <Badge variant="outline" className="border-sage-500 text-sage-400 text-xs px-3 py-1 rounded-md">
+                        CBD: {product.cbd}%
+                      </Badge>
+                      <Badge variant="outline" className="border-gold-500 text-gold-400 text-xs px-3 py-1 rounded-md">
+                        {product.strain}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {(product.category === "glassware" || product.category === "artwork") && (
+                    <p className="text-sm text-gold-400 mb-5">By {product.artist}</p>
+                  )}
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-2xl font-bold text-white">${product.price}</span>
+                    <Button
+                      className={product.inStock > 0 ? "premium-gradient shadow-lg shadow-forest-900/20 hover:shadow-xl hover:shadow-forest-900/30 transition-all duration-300" : "bg-gray-700"}
+                      disabled={product.inStock === 0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        addToCartHandler(product)
+                      }}
+                    >
+                      {product.inStock > 0 ? "Add to Cart" : "Out of Stock"}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
 
       {/* Product Detail Dialog */}
       <ProductDetailDialog product={selectedProduct} onClose={() => setSelectedProduct(null)} />
