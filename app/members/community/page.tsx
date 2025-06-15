@@ -808,7 +808,9 @@ export default function CommunityPage() {
                       Expert Level
                     </Badge>
                   </div>
-                  <Button className="premium-gradient text-white w-fit">Read Full Article</Button>
+                  <Link href="/members/community/articles">
+                    <Button className="premium-gradient text-white w-fit" as="a">Read Full Article</Button>
+                  </Link>
                 </div>
               </div>
             </Card>
@@ -838,7 +840,9 @@ export default function CommunityPage() {
                     <div className="text-sage-300 text-sm">• Nutrient Schedules & Feeding</div>
                     <div className="text-sage-300 text-sm">• Harvest & Curing Techniques</div>
                   </div>
-                  <Button className="w-full premium-gradient">Explore Articles</Button>
+                  <Link href="/members/community/articles">
+                    <Button className="w-full premium-gradient">Explore Articles</Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -865,9 +869,9 @@ export default function CommunityPage() {
                     <div className="text-sage-300 text-sm">• Preserving Terpenes in Curing</div>
                     <div className="text-sage-300 text-sm">• The Entourage Effect</div>
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-purple-500 to-purple-700 text-white">
-                    Explore Articles
-                  </Button>
+                  <Link href="/members/community/articles">
+                    <Button className="w-full bg-gradient-to-r from-purple-500 to-purple-700 text-white">Explore Articles</Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -894,9 +898,9 @@ export default function CommunityPage() {
                     <div className="text-sage-300 text-sm">• Microdosing Guidelines</div>
                     <div className="text-sage-300 text-sm">• Anxiety Relief Strains</div>
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-700 text-white">
-                    Explore Articles
-                  </Button>
+                  <Link href="/members/community/articles">
+                    <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-700 text-white">Explore Articles</Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -923,9 +927,9 @@ export default function CommunityPage() {
                     <div className="text-sage-300 text-sm">• Growing Equipment Reviews</div>
                     <div className="text-sage-300 text-sm">• Storage Solutions Guide</div>
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-amber-500 to-amber-700 text-white">
-                    Explore Articles
-                  </Button>
+                  <Link href="/members/community/articles">
+                    <Button className="w-full bg-gradient-to-r from-amber-500 to-amber-700 text-white">Explore Articles</Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>
