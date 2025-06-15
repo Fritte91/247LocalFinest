@@ -1,10 +1,21 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 
 // Get all products (admin view)
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     await connectDB();
     const products = await Product.find({}).sort({ createdAt: -1 });
     return NextResponse.json(products);
@@ -20,8 +31,17 @@ export async function GET() {
 // Create new product
 export async function POST(request: Request) {
   try {
-    await connectDB();
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
+    await connectDB();
     
     // Validate required fields
     const requiredFields = ['name', 'category', 'price', 'stock'];
@@ -67,39 +87,33 @@ export async function POST(request: Request) {
 // Update product
 export async function PUT(request: Request) {
   try {
-    await connectDB();
-    const body = await request.json();
-    const { _id, ...updateData } = body;
+    const session = await getServerSession(authOptions);
     
-    if (!_id) {
+    if (!session || session.user.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Product ID is required' },
-        { status: 400 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
-    const product = await Product.findByIdAndUpdate(
-      _id,
-      { ...updateData, updatedAt: new Date() },
-      { new: true, runValidators: true }
-    );
-
+    const body = await request.json();
+    const { _id, ...updates } = body;
+    
+    await connectDB();
+    const product = await Product.findByIdAndUpdate(_id, updates, { new: true });
+    
     if (!product) {
       return NextResponse.json(
         { error: 'Product not found' },
         { status: 404 }
       );
     }
-
+    
     return NextResponse.json(product);
   } catch (error: any) {
     console.error('Error updating product:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to update product', 
-        details: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      },
+      { error: 'Failed to update product', details: error.message },
       { status: 500 }
     );
   }
@@ -108,35 +122,40 @@ export async function PUT(request: Request) {
 // Delete product
 export async function DELETE(request: Request) {
   try {
-    await connectDB();
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-
+    
     if (!id) {
       return NextResponse.json(
         { error: 'Product ID is required' },
         { status: 400 }
       );
     }
-
+    
+    await connectDB();
     const product = await Product.findByIdAndDelete(id);
-
+    
     if (!product) {
       return NextResponse.json(
         { error: 'Product not found' },
         { status: 404 }
       );
     }
-
+    
     return NextResponse.json({ message: 'Product deleted successfully' });
   } catch (error: any) {
     console.error('Error deleting product:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to delete product', 
-        details: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      },
+      { error: 'Failed to delete product', details: error.message },
       { status: 500 }
     );
   }

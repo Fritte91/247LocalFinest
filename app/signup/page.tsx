@@ -98,12 +98,11 @@ export default function SignupPage() {
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
-          address: {
-            street: formData.address,
-            city: formData.city,
-            state: formData.state,
-            zipCode: formData.zipCode,
-          },
+          dateOfBirth: formData.dateOfBirth,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
         }),
       })
 

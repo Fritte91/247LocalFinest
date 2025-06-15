@@ -5,9 +5,20 @@ import User from '@/models/User';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, role = 'user' } = await request.json();
+    const { 
+      name, 
+      email, 
+      password, 
+      phone,
+      dateOfBirth,
+      address,
+      city,
+      state,
+      zipCode,
+      role = 'user' 
+    } = await request.json();
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !phone || !dateOfBirth || !address || !city || !state || !zipCode) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -25,15 +36,30 @@ export async function POST(request: Request) {
       );
     }
 
+    // Split name into firstName and lastName
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ');
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
       role,
+      phone,
+      phoneNumber: phone, // For backward compatibility
+      dateOfBirth: new Date(dateOfBirth),
+      address: {
+        street: address,
+        city,
+        state,
+        zipCode
+      }
     });
 
     // Remove password from response

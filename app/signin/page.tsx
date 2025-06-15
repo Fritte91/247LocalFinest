@@ -61,8 +61,16 @@ export default function SignInPage() {
         return
       }
 
-      // Successful login
-      router.push("/members")
+      // Get the session to check user role
+      const response = await fetch('/api/auth/session')
+      const session = await response.json()
+
+      // Redirect based on user role
+      if (session?.user?.role === 'admin') {
+        router.push('/admin')
+      } else {
+        router.push('/members')
+      }
       router.refresh()
     } catch (error) {
       toast({

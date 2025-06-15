@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 
 interface User {
   id: string
@@ -14,14 +15,7 @@ interface CartItem {
   name: string
   price: number
   quantity: number
-  image?: string
-  category?: string
-  grower?: string
-  artist?: string
-  thc?: string | number
-  cbd?: string | number
-  strain?: string
-  [key: string]: any
+  image: string
 }
 
 interface AppContextType {
@@ -40,41 +34,28 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const { data: session } = useSession()
   const [cart, setCart] = useState<CartItem[]>([])
 
-  // Load user and cart from localStorage on mount
+  // Load cart from localStorage on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem("user")
     const savedCart = localStorage.getItem("cart")
-    
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
-    }
     if (savedCart) {
       setCart(JSON.parse(savedCart))
     }
   }, [])
 
-  // Save user and cart to localStorage when they change
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user))
-    } else {
-      localStorage.removeItem("user")
-    }
-  }, [user])
-
+  // Save cart to localStorage when it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart))
   }, [cart])
 
   const login = (userData: User) => {
-    setUser(userData)
+    // This is now handled by NextAuth
   }
 
   const logout = () => {
-    setUser(null)
+    // This is now handled by NextAuth
     setCart([])
   }
 
@@ -105,10 +86,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   const value = {
-    user,
+    user: session?.user ? {
+      id: session.user.id,
+      fullName: session.user.name || '',
+      email: session.user.email || '',
+      role: session.user.role as "user" | "admin"
+    } : null,
     cart,
-    isAuthenticated: !!user,
-    isAdmin: user?.role === "admin",
+    isAuthenticated: !!session,
+    isAdmin: session?.user?.role === 'admin',
     login,
     logout,
     addToCart,

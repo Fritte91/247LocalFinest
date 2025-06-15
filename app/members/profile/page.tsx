@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,31 +8,136 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Leaf, User, MapPin, Phone, Mail, Calendar, Edit, Save, X, Package, Star, Shield } from "lucide-react"
-import { useApp } from "@/lib/context"
+import { Leaf, User, MapPin, Phone, Mail, Calendar, Edit, Save, X, Package, Star, Shield, LogOut } from "lucide-react"
+import { useSession, signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function ProfilePage() {
-  const { isAdmin } = useApp()
+  const { data: session } = useSession()
+  const router = useRouter()
+  const { toast } = useToast()
+  const isAdmin = session?.user?.role === 'admin'
   const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [profileData, setProfileData] = useState({
-    fullName: "John Smith",
-    email: "john.smith@email.com",
-    phone: "(555) 123-4567",
-    dateOfBirth: "1990-05-15",
-    address: "123 Main Street",
-    city: "San Francisco",
-    state: "CA",
-    zipCode: "94102",
-    memberSince: "2023-01-15",
-    totalOrders: 24,
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    },
+    createdAt: "",
+    totalOrders: 0,
     favoriteCategory: "Flowers",
   })
 
   const [editData, setEditData] = useState({ ...profileData })
 
-  const handleSave = () => {
-    setProfileData({ ...editData })
-    setIsEditing(false)
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await fetch('/api/user/profile')
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile data')
+        }
+        const data = await response.json()
+        setProfileData({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
+          address: {
+            street: data.address?.street || "",
+            city: data.address?.city || "",
+            state: data.address?.state || "",
+            zipCode: data.address?.zipCode || ""
+          },
+          createdAt: data.createdAt || "",
+          totalOrders: 0, // This will be updated when we implement orders
+          favoriteCategory: "Flowers", // This will be updated when we implement preferences
+        })
+        setEditData({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
+          address: {
+            street: data.address?.street || "",
+            city: data.address?.city || "",
+            state: data.address?.state || "",
+            zipCode: data.address?.zipCode || ""
+          },
+          createdAt: data.createdAt || "",
+          totalOrders: 0,
+          favoriteCategory: "Flowers",
+        })
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (session) {
+      fetchProfileData()
+    }
+  }, [session, toast])
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: editData.firstName,
+          lastName: editData.lastName,
+          phone: editData.phone,
+          dateOfBirth: editData.dateOfBirth,
+          address: editData.address,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile')
+      }
+
+      const updatedData = await response.json()
+      setProfileData({
+        ...profileData,
+        firstName: updatedData.firstName,
+        lastName: updatedData.lastName,
+        phone: updatedData.phone,
+        dateOfBirth: updatedData.dateOfBirth ? new Date(updatedData.dateOfBirth).toISOString().split('T')[0] : "",
+        address: updatedData.address,
+      })
+      setIsEditing(false)
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      })
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleCancel = () => {
@@ -40,29 +145,17 @@ export default function ProfilePage() {
     setIsEditing(false)
   }
 
-  const recentOrders = [
-    {
-      id: "ORD-001",
-      date: "2024-01-15",
-      total: 127.5,
-      status: "Delivered",
-      items: ["Purple Haze Premium", "Artisan Glass Pipe"],
-    },
-    {
-      id: "ORD-002",
-      date: "2024-01-08",
-      total: 85.0,
-      status: "Delivered",
-      items: ["OG Kush Indoor"],
-    },
-    {
-      id: "ORD-003",
-      date: "2024-01-01",
-      total: 42.0,
-      status: "Processing",
-      items: ["Hybrid Balance"],
-    },
-  ]
+  const handleLogout = async () => {
+    await signOut({ redirect: true, callbackUrl: '/signin' })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -89,6 +182,24 @@ export default function ProfilePage() {
                 Profile
               </Button>
             </nav>
+            <div className="flex items-center space-x-4">
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin Dashboard
+                  </Button>
+                </Link>
+              )}
+              <Button
+                variant="outline"
+                className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -135,14 +246,6 @@ export default function ProfilePage() {
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Profile
                       </Button>
-                      {isAdmin && (
-                        <Link href="/admin">
-                          <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                            <Shield className="h-4 w-4 mr-2" />
-                            Admin Dashboard
-                          </Button>
-                        </Link>
-                      )}
                     </div>
                   ) : (
                     <div className="flex gap-2">
@@ -171,7 +274,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="dark-glass rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-forest-400">
-                      {new Date(profileData.memberSince).getFullYear()}
+                      {new Date(profileData.createdAt).getFullYear()}
                     </div>
                     <div className="text-sage-300 text-sm">Member Since</div>
                   </div>
@@ -180,38 +283,41 @@ export default function ProfilePage() {
                 {/* Personal Information */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <Label className="text-sage-300 font-medium">Full Name</Label>
+                    <Label className="text-sage-300 font-medium">First Name</Label>
                     {isEditing ? (
                       <Input
-                        value={editData.fullName}
-                        onChange={(e) => setEditData({ ...editData, fullName: e.target.value })}
+                        value={editData.firstName}
+                        onChange={(e) => setEditData({ ...editData, firstName: e.target.value })}
                         className="mt-2 bg-black border-sage-700 text-white"
                       />
                     ) : (
                       <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
-                        {profileData.fullName}
+                        {profileData.firstName}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-sage-300 font-medium">Last Name</Label>
+                    {isEditing ? (
+                      <Input
+                        value={editData.lastName}
+                        onChange={(e) => setEditData({ ...editData, lastName: e.target.value })}
+                        className="mt-2 bg-black border-sage-700 text-white"
+                      />
+                    ) : (
+                      <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
+                        {profileData.lastName}
                       </div>
                     )}
                   </div>
 
                   <div>
                     <Label className="text-sage-300 font-medium">Email Address</Label>
-                    {isEditing ? (
-                      <div className="relative mt-2">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sage-400 h-5 w-5" />
-                        <Input
-                          type="email"
-                          value={editData.email}
-                          onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                          className="pl-12 bg-black border-sage-700 text-white"
-                        />
-                      </div>
-                    ) : (
-                      <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white flex items-center gap-3">
-                        <Mail className="h-5 w-5 text-sage-400" />
-                        {profileData.email}
-                      </div>
-                    )}
+                    <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white flex items-center gap-3">
+                      <Mail className="h-5 w-5 text-sage-400" />
+                      {profileData.email}
+                    </div>
                   </div>
 
                   <div>
@@ -249,7 +355,7 @@ export default function ProfilePage() {
                     ) : (
                       <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-sage-400" />
-                        {new Date(profileData.dateOfBirth).toISOString().slice(0, 10)}
+                        {profileData.dateOfBirth}
                       </div>
                     )}
                   </div>
@@ -266,13 +372,16 @@ export default function ProfilePage() {
                     <Label className="text-sage-300 font-medium">Street Address</Label>
                     {isEditing ? (
                       <Input
-                        value={editData.address}
-                        onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                        value={editData.address.street}
+                        onChange={(e) => setEditData({
+                          ...editData,
+                          address: { ...editData.address, street: e.target.value }
+                        })}
                         className="mt-2 bg-black border-sage-700 text-white"
                       />
                     ) : (
                       <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
-                        {profileData.address}
+                        {profileData.address.street}
                       </div>
                     )}
                   </div>
@@ -282,13 +391,16 @@ export default function ProfilePage() {
                       <Label className="text-sage-300 font-medium">City</Label>
                       {isEditing ? (
                         <Input
-                          value={editData.city}
-                          onChange={(e) => setEditData({ ...editData, city: e.target.value })}
+                          value={editData.address.city}
+                          onChange={(e) => setEditData({
+                            ...editData,
+                            address: { ...editData.address, city: e.target.value }
+                          })}
                           className="mt-2 bg-black border-sage-700 text-white"
                         />
                       ) : (
                         <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
-                          {profileData.city}
+                          {profileData.address.city}
                         </div>
                       )}
                     </div>
@@ -297,13 +409,16 @@ export default function ProfilePage() {
                       <Label className="text-sage-300 font-medium">State</Label>
                       {isEditing ? (
                         <Input
-                          value={editData.state}
-                          onChange={(e) => setEditData({ ...editData, state: e.target.value })}
+                          value={editData.address.state}
+                          onChange={(e) => setEditData({
+                            ...editData,
+                            address: { ...editData.address, state: e.target.value }
+                          })}
                           className="mt-2 bg-black border-sage-700 text-white"
                         />
                       ) : (
                         <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
-                          {profileData.state}
+                          {profileData.address.state}
                         </div>
                       )}
                     </div>
@@ -312,13 +427,16 @@ export default function ProfilePage() {
                       <Label className="text-sage-300 font-medium">Zip Code</Label>
                       {isEditing ? (
                         <Input
-                          value={editData.zipCode}
-                          onChange={(e) => setEditData({ ...editData, zipCode: e.target.value })}
+                          value={editData.address.zipCode}
+                          onChange={(e) => setEditData({
+                            ...editData,
+                            address: { ...editData.address, zipCode: e.target.value }
+                          })}
                           className="mt-2 bg-black border-sage-700 text-white"
                         />
                       ) : (
                         <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
-                          {profileData.zipCode}
+                          {profileData.address.zipCode}
                         </div>
                       )}
                     </div>
@@ -336,38 +454,8 @@ export default function ProfilePage() {
                 <CardDescription className="text-sage-300">View your recent purchases and order status</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {recentOrders.map((order) => (
-                    <div key={order.id} className="dark-glass rounded-lg p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h4 className="text-lg font-semibold text-white">Order {order.id}</h4>
-                          <p className="text-sage-300">{new Date(order.date).toLocaleDateString()}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-white">${order.total.toFixed(2)}</div>
-                          <Badge
-                            className={
-                              order.status === "Delivered"
-                                ? "bg-forest-600 text-white"
-                                : order.status === "Processing"
-                                  ? "bg-gold-600 text-white"
-                                  : "bg-sage-600 text-white"
-                            }
-                          >
-                            {order.status}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {order.items.map((item, index) => (
-                          <Badge key={index} variant="outline" className="border-sage-500 text-sage-400">
-                            {item}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center text-sage-300 py-8">
+                  No orders found. Start shopping to see your order history here.
                 </div>
               </CardContent>
             </Card>

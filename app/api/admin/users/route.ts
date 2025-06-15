@@ -1,15 +1,21 @@
 import { NextResponse } from 'next/server'
-import { connect } from 'mongoose'
-import User from '../../../../models/User'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import connectDB from '@/lib/mongodb'
+import User from '@/models/User'
 
 export async function GET() {
   try {
-    if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined in environment variables')
+    const session = await getServerSession(authOptions)
+    
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    await connect(process.env.MONGODB_URI)
-    
+    await connectDB()
     const totalUsers = await User.countDocuments()
     
     return NextResponse.json({ totalUsers })

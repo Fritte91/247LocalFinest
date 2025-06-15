@@ -23,11 +23,15 @@ import {
   AlertTriangle,
   Beaker,
   Upload,
+  LogOut,
+  User,
 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import Image from "next/image"
 import Link from "next/link"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useSession, signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 interface Product {
   _id: string;
@@ -68,6 +72,8 @@ interface NewProduct {
 }
 
 export default function AdminDashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const { toast } = useToast()
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -94,15 +100,28 @@ export default function AdminDashboard() {
   const [totalMembers, setTotalMembers] = useState<number>(0)
   const [isAddProductOpen, setIsAddProductOpen] = useState(false)
 
-  // Fetch products and user count on component mount
+  // Redirect if not admin
   useEffect(() => {
-    fetchProducts()
-    fetchTotalMembers()
-  }, [])
+    if (status === 'unauthenticated') {
+      router.push('/signin')
+    } else if (status === 'authenticated' && session?.user?.role !== 'admin') {
+      router.push('/members')
+    }
+  }, [status, session, router])
+
+  // Only fetch data if authenticated and admin
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.role === 'admin') {
+      fetchProducts()
+      fetchTotalMembers()
+    }
+  }, [status, session])
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products')
+      const response = await fetch('/api/admin/products', {
+        credentials: 'include'
+      })
       if (!response.ok) throw new Error('Failed to fetch products')
       const data = await response.json()
       setProducts(data)
@@ -117,7 +136,9 @@ export default function AdminDashboard() {
 
   const fetchTotalMembers = async () => {
     try {
-      const response = await fetch('/api/admin/users')
+      const response = await fetch('/api/admin/users', {
+        credentials: 'include'
+      })
       if (!response.ok) throw new Error('Failed to fetch user count')
       const data = await response.json()
       setTotalMembers(data.totalUsers)
@@ -172,10 +193,11 @@ export default function AdminDashboard() {
   }
 
   const handleAddProduct = async () => {
-    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.thc || !newProduct.cbd || !newProduct.description || !newProduct.grower || !newProduct.artist || !newProduct.effects || !newProduct.terpenes || !newProduct.flavors || !newProduct.sativaRatio || !newProduct.indicaRatio) {
+    // Only validate required fields from the database schema
+    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock) {
       toast({
         title: "Error",
-        description: "All fields are required",
+        description: "Name, category, price, and stock are required",
         variant: "destructive",
       })
       return
@@ -190,23 +212,35 @@ export default function AdminDashboard() {
       }
 
       const productData = {
-        ...newProduct,
+        name: newProduct.name,
+        category: newProduct.category,
+        subcategory: newProduct.subcategory || undefined,
         price: Number.parseFloat(newProduct.price),
         stock: Number.parseInt(newProduct.stock) || 0,
+        thc: newProduct.thc || undefined,
+        cbd: newProduct.cbd || undefined,
+        description: newProduct.description || undefined,
+        grower: newProduct.grower || undefined,
+        artist: newProduct.artist || undefined,
+        effects: newProduct.effects || undefined,
+        terpenes: newProduct.terpenes || undefined,
+        flavors: newProduct.flavors || undefined,
         images: imageUrls,
         status: Number.parseInt(newProduct.stock) > 10 ? "active" : 
-                Number.parseInt(newProduct.stock) > 0 ? "low_stock" : "out_of_stock",
-        sativaRatio: Number.parseInt(newProduct.sativaRatio),
-        indicaRatio: Number.parseInt(newProduct.indicaRatio)
+                Number.parseInt(newProduct.stock) > 0 ? "low_stock" : "out_of_stock"
       }
 
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(productData),
       })
 
-      if (!response.ok) throw new Error('Failed to create product')
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to create product')
+      }
       
       const createdProduct = await response.json()
       setProducts([...products, createdProduct])
@@ -231,15 +265,16 @@ export default function AdminDashboard() {
         indicaRatio: ""
       })
       setSelectedImages([])
+      setIsAddProductOpen(false)
 
       toast({
         title: "Success",
         description: "Product created successfully",
       })
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to create product",
+        description: error.message || "Failed to create product",
         variant: "destructive",
       })
     } finally {
@@ -252,6 +287,7 @@ export default function AdminDashboard() {
       const response = await fetch(`/api/admin/products`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ _id: id, ...updates }),
       })
 
@@ -280,6 +316,7 @@ export default function AdminDashboard() {
     try {
       const response = await fetch(`/api/admin/products?id=${id}`, {
         method: 'DELETE',
+        credentials: 'include'
       })
 
       if (!response.ok) throw new Error('Failed to delete product')
@@ -324,38 +361,57 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleLogout = async () => {
+    await signOut({ redirect: true, callbackUrl: '/signin' })
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
+
+  if (status === 'unauthenticated' || session?.user?.role !== 'admin') {
+    return null
+  }
+
   return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="border-b border-sage-800 bg-black/95 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Leaf className="h-8 w-8 text-forest-500" />
-              <span className="text-2xl font-display font-bold text-white">GreenCraft Admin</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button asChild variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
-                  <span className="flex items-center">
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Store
-                  </span>
-                </Button>
-              </Link>
-              <Link href="/members/profile">
-                <Button asChild variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
-                  <span>Admin Profile</span>
-                </Button>
-              </Link>
-            </div>
+    <div className="min-h-screen bg-black p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header with Navigation */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Leaf className="h-8 w-8 text-forest-500" />
+            <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link href="/">
+              <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white">
+                <Eye className="h-4 w-4 mr-2" />
+                View Shop
+              </Button>
+            </Link>
+            <Link href="/members/profile">
+              <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white">
+                <User className="h-4 w-4 mr-2" />
+                Back to Profile
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Dashboard Stats */}
-        <div className="grid md:grid-cols-5 gap-6 mb-8">
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card className="bg-sage-950 border-sage-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-sage-300">Total Products</CardTitle>
