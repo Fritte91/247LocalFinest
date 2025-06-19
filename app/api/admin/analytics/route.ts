@@ -7,16 +7,30 @@ import Product from '@/models/Product';
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    console.log('Analytics API called');
     
-    if (!session || session.user.role !== 'admin') {
+    const session = await getServerSession(authOptions);
+    console.log('Session:', session);
+    
+    if (!session) {
+      console.log('No session found');
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'No session found' },
+        { status: 401 }
+      );
+    }
+    
+    if (session.user.role !== 'admin') {
+      console.log('User is not admin:', session.user.role);
+      return NextResponse.json(
+        { error: 'Unauthorized - not admin' },
         { status: 401 }
       );
     }
 
+    console.log('Connecting to database...');
     await connectDB();
+    console.log('Database connected');
 
     // Get date ranges for analytics
     const now = new Date();
@@ -24,10 +38,13 @@ export async function GET(request: Request) {
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
+    console.log('Fetching orders...');
     // Get all orders
     const allOrders = await Order.find({ paymentStatus: 'completed' })
       .populate('items.product', 'name price category')
       .sort({ createdAt: -1 });
+    
+    console.log('Orders fetched:', allOrders.length);
 
     // Calculate total revenue
     const totalRevenue = allOrders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -121,11 +138,12 @@ export async function GET(request: Request) {
       }))
     };
 
+    console.log('Analytics calculated successfully');
     return NextResponse.json(analytics);
   } catch (error) {
     console.error('Error fetching analytics:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch analytics' },
+      { error: 'Failed to fetch analytics', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

@@ -6,27 +6,43 @@ import Order from '@/models/Order';
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    console.log('Orders API called');
     
-    if (!session || session.user.role !== 'admin') {
+    const session = await getServerSession(authOptions);
+    console.log('Session:', session);
+    
+    if (!session) {
+      console.log('No session found');
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'No session found' },
+        { status: 401 }
+      );
+    }
+    
+    if (session.user.role !== 'admin') {
+      console.log('User is not admin:', session.user.role);
+      return NextResponse.json(
+        { error: 'Unauthorized - not admin' },
         { status: 401 }
       );
     }
 
+    console.log('Connecting to database...');
     await connectDB();
+    console.log('Database connected');
 
+    console.log('Fetching orders...');
     const orders = await Order.find({})
       .populate('user', 'firstName lastName email phone phoneNumber')
       .populate('items.product', 'name price image category')
       .sort({ createdAt: -1 });
 
+    console.log('Orders fetched:', orders.length);
     return NextResponse.json(orders);
   } catch (error) {
     console.error('Error fetching orders:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch orders' },
+      { error: 'Failed to fetch orders', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
