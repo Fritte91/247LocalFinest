@@ -518,27 +518,27 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-black p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header with Navigation */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-2">
             <Leaf className="h-8 w-8 text-forest-500" />
             <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
             <Link href="/members">
-              <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300">
+              <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 whitespace-nowrap">
                 <Eye className="h-4 w-4 mr-2" />
                 View Shop
               </Button>
             </Link>
             <Link href="/members/profile">
-              <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300">
+              <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 whitespace-nowrap">
                 <User className="h-4 w-4 mr-2" />
                 Back to Profile
               </Button>
             </Link>
             <Button 
               variant="default" 
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-white whitespace-nowrap"
               onClick={() => signOut()}
             >
               <LogOut className="h-4 w-4 mr-2" />

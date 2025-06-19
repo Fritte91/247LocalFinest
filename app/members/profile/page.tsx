@@ -324,7 +324,7 @@ export default function ProfilePage() {
                     )}
                     {isAdmin && (
                       <Link href="/admin" className="w-full sm:w-auto">
-                        <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white w-full whitespace-nowrap">
+                        <Button className="bg-purple-600 hover:bg-purple-700 text-white w-full whitespace-nowrap">
                           <Shield className="h-4 w-4 mr-2" />
                           Admin Dashboard
                         </Button>

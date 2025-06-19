@@ -152,8 +152,8 @@ export default function CartPage() {
             </Link>
             <Link href="/members">
               <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Continue Shopping
+                <ArrowLeft className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Continue Shopping</span>
               </Button>
             </Link>
           </div>
@@ -164,28 +164,6 @@ export default function CartPage() {
         <div className="mb-8">
           <h1 className="text-4xl font-display font-bold text-white mb-2">Shopping Cart</h1>
           <p className="text-xl text-sage-300">Review your premium cannabis selection</p>
-          <div className="mt-4 flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                console.log('Current cart contents:', cart);
-                clearCart();
-                console.log('Cart cleared');
-              }}
-              className="border-red-600 text-red-400 hover:bg-red-900"
-            >
-              Debug: Clear Cart
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                console.log('Current cart contents:', cart);
-              }}
-              className="border-blue-600 text-blue-400 hover:bg-blue-900"
-            >
-              Debug: Log Cart
-            </Button>
-          </div>
         </div>
 
         {cart.length === 0 ? (

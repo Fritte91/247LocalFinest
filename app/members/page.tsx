@@ -596,12 +596,6 @@ export default function MembersShop() {
         <div className="mb-8">
           <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
             <TabsList className="grid w-full grid-cols-4 bg-sage-950/80 backdrop-blur-sm border border-sage-700 h-14 rounded-xl overflow-hidden">
-              <TabsTrigger
-                value="all"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-forest-600 data-[state=active]:to-forest-700 data-[state=active]:text-white text-sage-300 h-full text-sm font-medium transition-all duration-300 px-4"
-              >
-                All Products
-              </TabsTrigger>
               {Object.entries(categories).map(([key, category]) => (
                 <TabsTrigger
                   key={key}
