@@ -10,12 +10,13 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
-import { Leaf, Search, ShoppingCart, Star, User, Grid, List, Filter, Clock, Award, MapPin, Heart } from "lucide-react"
+import { Leaf, Search, ShoppingCart, Star, User, Grid, List, Filter, Clock, Award, MapPin, Heart, Menu, X } from "lucide-react"
 import type { ChangeEvent, MouseEvent } from "react"
-import { useApp } from "@/lib/context"
+import { useApp, type CartItem } from "@/app/hooks/use-app"
 import { toast } from "sonner"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { SizeGuide } from "@/components/ui/size-guide"
+import { MobileNav } from "@/app/components/mobile-nav"
 
 // Define types for products
 interface Grower {
@@ -82,6 +83,9 @@ export default function MembersShop() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const { addToCart, cart, addToWishlist, removeFromWishlist, isInWishlist } = useApp()
 
   const categories = {
     all: { name: "All Products", subcategories: [] },
@@ -110,8 +114,6 @@ export default function MembersShop() {
       ],
     },
   }
-
-  const { addToCart, cart, addToWishlist, removeFromWishlist, isInWishlist } = useApp()
 
   useEffect(() => {
     async function fetchProducts() {
@@ -488,6 +490,8 @@ export default function MembersShop() {
               <Leaf className="h-8 w-8 text-forest-500" />
               <span className="text-2xl font-display font-bold text-white">247LocalFinest</span>
             </Link>
+            
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
               <Link href="/members" className="text-white font-medium border-b-2 border-forest-500 pb-1">
                 Shop
@@ -499,22 +503,29 @@ export default function MembersShop() {
                 Growers
               </Link>
               <Link href="/members/cart">
-                <Button variant="outline" className="relative">
+                <Button variant="outline" className="relative bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 transition-all duration-300">
                   <ShoppingCart className="h-4 w-4" />
                   {cart.length > 0 && (
                     <Badge className="absolute -top-2 -right-2 gold-gradient text-white text-xs animate-pulse">
-                      {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                      {cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0)}
                     </Badge>
                   )}
                 </Button>
               </Link>
               <Link href="/members/profile">
-                <Button variant="outline">
+                <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 transition-all duration-300">
                   <User className="h-4 w-4 mr-2" />
                   Profile
                 </Button>
               </Link>
             </nav>
+
+            <MobileNav 
+              mobileMenuOpen={mobileMenuOpen}
+              setMobileMenuOpen={setMobileMenuOpen}
+              cartItemCount={cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0)}
+              currentPath="/members"
+            />
           </div>
         </div>
       </header>
@@ -581,54 +592,27 @@ export default function MembersShop() {
           </div>
         </div>
         
-        {/* Category Navigation - Modern Tab Style */}
+        {/* Category Navigation */}
         <div className="mb-8">
           <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
             <TabsList className="grid w-full grid-cols-4 bg-sage-950/80 backdrop-blur-sm border border-sage-700 h-14 rounded-xl overflow-hidden">
+              <TabsTrigger
+                value="all"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-forest-600 data-[state=active]:to-forest-700 data-[state=active]:text-white text-sage-300 h-full text-sm font-medium transition-all duration-300 px-4"
+              >
+                All Products
+              </TabsTrigger>
               {Object.entries(categories).map(([key, category]) => (
                 <TabsTrigger
                   key={key}
                   value={key}
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-forest-600 data-[state=active]:to-forest-700 data-[state=active]:text-white text-sage-300 h-full text-lg font-medium transition-all duration-300"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-forest-600 data-[state=active]:to-forest-700 data-[state=active]:text-white text-sage-300 h-full text-sm font-medium transition-all duration-300 px-4"
                 >
                   {category.name}
                 </TabsTrigger>
               ))}
             </TabsList>
           </Tabs>
-
-          {/* Subcategory Navigation - Improved Integration */}
-          {selectedCategory !== "all" && categories[selectedCategory].subcategories.length > 0 && (
-            <div className="my-6">
-              <div className="bg-sage-950/50 backdrop-blur-sm border border-sage-800/50 rounded-xl p-6 shadow-lg">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-1 h-8 bg-gradient-to-b from-forest-400 to-forest-600 rounded-full"></div>
-                  <h3 className="text-xl font-semibold text-white">{categories[selectedCategory].name} Categories</h3>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedSubCategory("all")}
-                    isActive={selectedSubCategory === "all"}
-                  >
-                    All {categories[selectedCategory].name}
-                  </Button>
-                  {categories[selectedCategory].subcategories.map((sub: { id: string; name: string }) => (
-                    <Button
-                      key={sub.id}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedSubCategory(sub.id)}
-                      isActive={selectedSubCategory === sub.id}
-                    >
-                      {sub.name}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Filters and View Toggle */}
@@ -641,19 +625,23 @@ export default function MembersShop() {
           </div>
           <div className="flex gap-3">
             <Button
-              variant="outline"
+              variant={viewMode === "grid" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("grid")}
-              isActive={viewMode === "grid"}
+              className={viewMode === "grid" ? 
+                "premium-gradient shadow-lg shadow-forest-900/20" : 
+                "bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300"}
             >
               <Grid className="h-4 w-4 mr-2" />
               Grid
             </Button>
             <Button
-              variant="outline"
+              variant={viewMode === "list" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("list")}
-              isActive={viewMode === "list"}
+              className={viewMode === "list" ? 
+                "premium-gradient shadow-lg shadow-forest-900/20" : 
+                "bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300"}
             >
               <List className="h-4 w-4 mr-2" />
               List
@@ -661,8 +649,8 @@ export default function MembersShop() {
           </div>
         </div>
 
-        {/* Product Grid */}
-        <div className={viewMode === "grid" ? "grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" : "space-y-6"}>
+        {/* Product Grid/List */}
+        <div className={viewMode === "grid" ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" : "space-y-4"}>
           {loading ? (
             Array.from({ length: 6 }).map((_, index) => (
               <ProductSkeleton key={index} />
@@ -672,82 +660,73 @@ export default function MembersShop() {
               <Card
                 key={product.id}
                 className={`bg-sage-950/70 border-sage-800/70 hover:border-forest-600 hover:shadow-xl hover:shadow-forest-900/10 transition-all duration-300 overflow-hidden group cursor-pointer backdrop-blur-sm ${
-                  viewMode === "list" ? "flex flex-row" : ""
+                  viewMode === "list" ? "flex items-center" : ""
                 }`}
                 onClick={() => setSelectedProduct(product)}
               >
-                <div className={viewMode === "list" ? "w-56 flex-shrink-0 relative" : "relative"}>
-                  <div className="absolute top-0 right-0 z-10 p-2">
-                    <Button size="icon" variant="ghost" className="rounded-full h-8 w-8 bg-black/40 backdrop-blur-sm text-sage-300 hover:text-white hover:bg-forest-700/60 transition-colors duration-300">
-                      <Heart className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="overflow-hidden">
-                    <Image
-                      src={product.images?.[0] || "/placeholder.svg"}
-                      alt={product.name}
-                      width={300}
-                      height={300}
-                      className={`object-contain transition-all duration-500 group-hover:scale-110 ${
-                        viewMode === "list" ? "w-full h-56" : "w-full h-64"
-                      }`}
-                    />
-                  </div>
+                <div className={viewMode === "list" ? "w-32 h-32 flex-shrink-0 relative" : "relative"}>
+                  <Image
+                    src={product.images?.[0] || "/placeholder.svg"}
+                    alt={product.name}
+                    width={300}
+                    height={300}
+                    className={`object-cover transition-all duration-500 group-hover:scale-110 ${
+                      viewMode === "list" ? "w-full h-full" : "w-full h-48"
+                    }`}
+                  />
                   {product.lowStock && (
-                    <Badge className="absolute top-3 right-3 bg-gold-600 text-white shadow-lg shadow-gold-900/30 animate-pulse">
+                    <Badge className="absolute top-2 right-2 bg-gold-600 text-white text-xs">
                       <Clock className="h-3 w-3 mr-1" />
-                      Low Stock!
+                      Low Stock
                     </Badge>
                   )}
-                  {!product.inStock && (
-                    <Badge className="absolute top-3 right-3 bg-red-600 text-white shadow-lg shadow-red-900/30">Out of Stock</Badge>
-                  )}
-                  <Badge className="absolute top-3 left-3 premium-gradient text-white capitalize shadow-lg shadow-forest-900/30 backdrop-blur-sm">
+                  <Badge className="absolute top-2 left-2 premium-gradient text-white capitalize text-xs">
                     {product.category}
                   </Badge>
                 </div>
 
-                <div className={`p-6 ${viewMode === "list" ? "flex-1" : ""}`}>
-                  <div className="flex justify-between items-start mb-3">
-                    <CardTitle className="text-white font-display text-xl group-hover:text-forest-400 transition-colors duration-300">{product.name}</CardTitle>
-                    <div className="flex items-center gap-1 bg-sage-900/60 px-2 py-1 rounded-md backdrop-blur-sm">
-                      <Star className="h-4 w-4 fill-gold-400 text-gold-400" />
-                      <span className="text-sm font-medium text-white">{product.rating}</span>
+                <div className={`p-4 ${viewMode === "list" ? "flex-1 flex items-center gap-4" : ""}`}>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start gap-2 mb-2">
+                      <h3 className="text-white font-medium text-sm md:text-base line-clamp-1">{product.name}</h3>
+                      <div className="flex items-center gap-1 bg-sage-900/60 px-1.5 py-0.5 rounded">
+                        <Star className="h-3 w-3 fill-gold-400 text-gold-400" />
+                        <span className="text-xs font-medium text-white">{product.rating}</span>
+                      </div>
                     </div>
+                    {viewMode === "list" ? (
+                      <>
+                        <p className="text-sage-300 text-sm mb-2 line-clamp-2">{product.description}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {product.thc && <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">THC: {product.thc}%</Badge>}
+                          {product.cbd && <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">CBD: {product.cbd}%</Badge>}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sage-300 text-xs mb-2 line-clamp-2">{product.description}</p>
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {product.thc && <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">THC: {product.thc}%</Badge>}
+                          {product.cbd && <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">CBD: {product.cbd}%</Badge>}
+                        </div>
+                      </>
+                    )}
                   </div>
-
-                  <CardDescription className="text-sage-300 mb-5 line-clamp-2 group-hover:text-sage-200 transition-colors duration-300">{product.description}</CardDescription>
-
-                  {product.category === "flowers" && (
-                    <div className="flex gap-2 mb-5 flex-wrap">
-                      <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs px-3 py-1 rounded-md">
-                        THC: {product.thc}%
-                      </Badge>
-                      <Badge variant="outline" className="border-sage-500 text-sage-400 text-xs px-3 py-1 rounded-md">
-                        CBD: {product.cbd}%
-                      </Badge>
-                      <Badge variant="outline" className="border-gold-500 text-gold-400 text-xs px-3 py-1 rounded-md">
-                        {product.strain}
-                      </Badge>
-                    </div>
-                  )}
-
-                  {(product.category === "glassware" || product.category === "artwork") && (
-                    <p className="text-sm text-gold-400 mb-5">By {product.artist}</p>
-                  )}
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-white">${product.price}</span>
-                    <Button
-                      className={product.inStock > 0 ? "premium-gradient shadow-lg shadow-forest-900/20 hover:shadow-xl hover:shadow-forest-900/30 transition-all duration-300" : "bg-gray-700"}
-                      disabled={product.inStock === 0}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        addToCartHandler(product)
-                      }}
-                    >
-                      {product.inStock > 0 ? "Add to Cart" : "Out of Stock"}
-                    </Button>
+                  <div className={viewMode === "list" ? "flex items-center gap-4" : "flex items-center justify-between mt-2"}>
+                    <div className="text-white font-bold">${product.price}</div>
+                    {viewMode === "grid" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-forest-600 text-white border-0 hover:bg-forest-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart(product);
+                        }}
+                      >
+                        Add
+                      </Button>
+                    )}
                   </div>
                 </div>
               </Card>

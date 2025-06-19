@@ -13,6 +13,7 @@ import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import Image from "next/image"
+import { MobileNav } from "@/app/components/mobile-nav"
 
 interface OrderItem {
   product: {
@@ -47,6 +48,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [orders, setOrders] = useState<Order[]>([])
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -255,6 +257,13 @@ export default function ProfilePage() {
                 Growers
               </Link>
             </nav>
+
+            <MobileNav 
+              mobileMenuOpen={mobileMenuOpen}
+              setMobileMenuOpen={setMobileMenuOpen}
+              cartItemCount={0}
+              currentPath="/members/profile"
+            />
           </div>
         </div>
       </header>
@@ -295,27 +304,27 @@ export default function ProfilePage() {
                       Update your account details and contact information
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     {!isEditing ? (
-                      <Button onClick={() => setIsEditing(true)} className="premium-gradient">
+                      <Button onClick={() => setIsEditing(true)} className="premium-gradient whitespace-nowrap">
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Profile
                       </Button>
                     ) : (
                       <>
-                        <Button onClick={handleSave} className="premium-gradient">
+                        <Button onClick={handleSave} className="premium-gradient whitespace-nowrap">
                           <Save className="h-4 w-4 mr-2" />
                           Save
                         </Button>
-                        <Button onClick={handleCancel} variant="outline" className="border-sage-600 text-sage-300">
+                        <Button onClick={handleCancel} variant="outline" className="border-sage-600 text-sage-300 whitespace-nowrap">
                           <X className="h-4 w-4 mr-2" />
                           Cancel
                         </Button>
                       </>
                     )}
                     {isAdmin && (
-                      <Link href="/admin">
-                        <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white">
+                      <Link href="/admin" className="w-full sm:w-auto">
+                        <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white w-full whitespace-nowrap">
                           <Shield className="h-4 w-4 mr-2" />
                           Admin Dashboard
                         </Button>
@@ -323,7 +332,7 @@ export default function ProfilePage() {
                     )}
                     <Button
                       variant="destructive"
-                      className="border-red-700 text-white bg-red-600 hover:bg-red-700 hover:text-white"
+                      className="border-red-700 text-white bg-red-600 hover:bg-red-700 hover:text-white whitespace-nowrap"
                       onClick={handleLogout}
                     >
                       <LogOut className="h-4 w-4 mr-2" />

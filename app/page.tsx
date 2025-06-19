@@ -105,34 +105,20 @@ export default function HomePage() {
                 Crafted with Excellence
               </span>
             </h1>
-            <p 
-              className="text-xl text-sage-300 mb-12 leading-relaxed animate-fade-in-up animation-delay-300"
-            >
-              Experience the finest cannabis products from our award-winning collective of master growers. Where quality
-              meets craftsmanship in every harvest.
+            <p className="text-sage-300 text-center text-lg md:text-xl mb-8">
+              Welcome to 247LocalFinest, your award-winning collective of master growers. Where quality meets craftsmanship in every harvest.
             </p>
-            <div 
-              className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in animation-delay-500"
-            >
-              <div className="flex items-center gap-4">
-                <Link href="/members">
-                  <Button
-                    size="lg"
-                    className="premium-gradient text-white px-10 py-6 text-lg font-semibold hover:scale-105 transition-transform duration-300 shadow-lg shadow-forest-900/20"
-                    onClick={() => setIsSignupOpen(true)}
-                  >
-                    Explore Collection
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 px-10 py-6 text-lg backdrop-blur-sm"
-                >
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/members" className="w-full sm:w-auto">
+                <Button className="w-full premium-gradient text-white px-8 py-2">
+                  Explore Collection
+                </Button>
+              </Link>
+              <Link href="/members/community" className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full border-sage-600 text-sage-300 hover:bg-sage-800 px-8 py-2">
                   Learn More
                 </Button>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
