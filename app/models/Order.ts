@@ -15,7 +15,6 @@ const orderSchema = new mongoose.Schema({
     quantity: {
       type: Number,
       required: true,
-      min: 1,
     },
     price: {
       type: Number,
@@ -31,18 +30,6 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
     default: 'pending',
   },
-  shippingAddress: {
-    street: String,
-    city: String,
-    state: String,
-    zipCode: String,
-  },
-  customerInfo: {
-    firstName: String,
-    lastName: String,
-    email: String,
-    phone: String,
-  },
   paymentStatus: {
     type: String,
     enum: ['pending', 'completed', 'failed', 'refunded'],
@@ -50,31 +37,34 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    required: true,
+    enum: ['credit_card', 'qr_code', 'bank_transfer'],
+    default: 'qr_code',
+  },
+  customerInfo: {
+    firstName: String,
+    lastName: String,
+    email: String,
+    phone: String,
+  },
+  shippingAddress: {
+    street: String,
+    city: String,
+    state: String,
+    zipCode: String,
   },
   tracking: {
     trackingNumber: String,
     carrier: {
       type: String,
       enum: ['USPS', 'FedEx', 'UPS', 'DHL'],
-      default: 'USPS'
     },
     shippedAt: Date,
     deliveredAt: Date,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+}, {
+  timestamps: true,
 });
 
-orderSchema.pre('save', function(next) {
-  this.updatedAt = new Date();
-  next();
-});
+const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 
-export default mongoose.models.Order || mongoose.model('Order', orderSchema); 
+export default Order; 

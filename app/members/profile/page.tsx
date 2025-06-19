@@ -8,10 +8,36 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Leaf, User, MapPin, Phone, Mail, Calendar, Edit, Save, X, Package, Star, Shield, LogOut } from "lucide-react"
+import { Leaf, User, MapPin, Phone, Mail, Calendar, Edit, Save, X, Package, Star, Shield, LogOut, Truck, CheckCircle, Clock, XCircle } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
+import Image from "next/image"
+
+interface OrderItem {
+  product: {
+    name: string;
+    price: number;
+    image?: string;
+    images?: string[];
+  };
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  _id: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+  tracking?: {
+    trackingNumber: string;
+    carrier: string;
+    shippedAt?: string;
+    deliveredAt?: string;
+  };
+}
 
 export default function ProfilePage() {
   const { data: session } = useSession()
@@ -20,6 +46,7 @@ export default function ProfilePage() {
   const isAdmin = session?.user?.role === 'admin'
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [orders, setOrders] = useState<Order[]>([])
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -60,8 +87,8 @@ export default function ProfilePage() {
             zipCode: data.address?.zipCode || ""
           },
           createdAt: data.createdAt || "",
-          totalOrders: 0, // This will be updated when we implement orders
-          favoriteCategory: "Flowers", // This will be updated when we implement preferences
+          totalOrders: 0,
+          favoriteCategory: "Flowers",
         })
         setEditData({
           firstName: data.firstName || "",
@@ -91,10 +118,60 @@ export default function ProfilePage() {
       }
     }
 
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch('/api/orders?userId=' + session?.user?.id)
+        if (!response.ok) {
+          throw new Error('Failed to fetch orders')
+        }
+        const data = await response.json()
+        setOrders(data)
+        setProfileData(prev => ({
+          ...prev,
+          totalOrders: data.length
+        }))
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load order history",
+          variant: "destructive",
+        })
+      }
+    }
+
     if (session) {
       fetchProfileData()
+      fetchOrders()
     }
   }, [session, toast])
+
+  const getStatusBadge = (status: Order['status']) => {
+    switch (status) {
+      case 'pending':
+        return <Badge className="bg-yellow-600 text-white"><Clock className="h-3 w-3 mr-1" />Pending</Badge>
+      case 'processing':
+        return <Badge className="bg-blue-600 text-white"><Package className="h-3 w-3 mr-1" />Processing</Badge>
+      case 'shipped':
+        return <Badge className="bg-forest-600 text-white"><Truck className="h-3 w-3 mr-1" />Shipped</Badge>
+      case 'delivered':
+        return <Badge className="bg-green-600 text-white"><CheckCircle className="h-3 w-3 mr-1" />Delivered</Badge>
+      case 'cancelled':
+        return <Badge className="bg-red-600 text-white"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>
+      default:
+        return <Badge variant="outline">Unknown</Badge>
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
 
   const handleSave = async () => {
     try {
@@ -177,29 +254,7 @@ export default function ProfilePage() {
               <Link href="/members/growers" className="text-sage-300 hover:text-white font-medium transition-colors">
                 Growers
               </Link>
-              <Button variant="outline" className="border-sage-600 text-white border-b-2 border-forest-500">
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </Button>
             </nav>
-            <div className="flex items-center space-x-4">
-              {isAdmin && (
-                <Link href="/admin">
-                  <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white">
-                    <Shield className="h-4 w-4 mr-2" />
-                    Admin Dashboard
-                  </Button>
-                </Link>
-              )}
-              <Button
-                variant="outline"
-                className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
           </div>
         </div>
       </header>
@@ -240,25 +295,41 @@ export default function ProfilePage() {
                       Update your account details and contact information
                     </CardDescription>
                   </div>
-                  {!isEditing ? (
-                    <div className="flex gap-2">
+                  <div className="flex gap-2">
+                    {!isEditing ? (
                       <Button onClick={() => setIsEditing(true)} className="premium-gradient">
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Profile
                       </Button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <Button onClick={handleSave} className="premium-gradient">
-                        <Save className="h-4 w-4 mr-2" />
-                        Save
-                      </Button>
-                      <Button onClick={handleCancel} variant="outline" className="border-sage-600 text-sage-300">
-                        <X className="h-4 w-4 mr-2" />
-                        Cancel
-                      </Button>
-                    </div>
-                  )}
+                    ) : (
+                      <>
+                        <Button onClick={handleSave} className="premium-gradient">
+                          <Save className="h-4 w-4 mr-2" />
+                          Save
+                        </Button>
+                        <Button onClick={handleCancel} variant="outline" className="border-sage-600 text-sage-300">
+                          <X className="h-4 w-4 mr-2" />
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                    {isAdmin && (
+                      <Link href="/admin">
+                        <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Admin Dashboard
+                        </Button>
+                      </Link>
+                    )}
+                    <Button
+                      variant="destructive"
+                      className="border-red-700 text-white bg-red-600 hover:bg-red-700 hover:text-white"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -454,9 +525,144 @@ export default function ProfilePage() {
                 <CardDescription className="text-sage-300">View your recent purchases and order status</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center text-sage-300 py-8">
-                  No orders found. Start shopping to see your order history here.
-                </div>
+                {orders.length === 0 ? (
+                  <div className="text-center text-sage-300 py-8">
+                    <Package className="h-16 w-16 text-sage-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-white mb-2">No orders yet</h3>
+                    <p className="text-sage-300 mb-6">Start shopping to see your order history here</p>
+                    <Link href="/members">
+                      <Button className="premium-gradient">Browse Products</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((order) => (
+                      <Card key={order._id} className="bg-black border-sage-800">
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-white text-lg">Order #{order._id.slice(-8)}</CardTitle>
+                              <CardDescription className="text-sage-300">
+                                Placed on {formatDate(order.createdAt)}
+                              </CardDescription>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {getStatusBadge(order.status)}
+                              {order.status === 'shipped' && order.tracking && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-forest-500 text-forest-400 hover:bg-forest-900"
+                                  onClick={() => {
+                                    if (!order.tracking) return;
+                                    const carrier = order.tracking.carrier || 'USPS'
+                                    let trackingUrl = ''
+                                    switch (carrier) {
+                                      case 'USPS':
+                                        trackingUrl = `https://tools.usps.com/go/TrackConfirmAction?tLabels=${order.tracking.trackingNumber}`
+                                        break
+                                      case 'FedEx':
+                                        trackingUrl = `https://www.fedex.com/fedextrack/?trknbr=${order.tracking.trackingNumber}`
+                                        break
+                                      case 'UPS':
+                                        trackingUrl = `https://www.ups.com/track?tracknum=${order.tracking.trackingNumber}`
+                                        break
+                                      case 'DHL':
+                                        trackingUrl = `https://www.dhl.com/en/express/tracking.html?AWB=${order.tracking.trackingNumber}`
+                                        break
+                                      default:
+                                        trackingUrl = `https://www.google.com/search?q=track+${order.tracking.trackingNumber}`
+                                    }
+                                    window.open(trackingUrl, '_blank')
+                                  }}
+                                >
+                                  <Truck className="h-4 w-4 mr-2" />
+                                  Track Package
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            {/* Order Items */}
+                            <div className="space-y-2">
+                              {order.items.map((item, index) => (
+                                <div key={index} className="flex justify-between items-center p-3 bg-sage-950 rounded-lg">
+                                  <div className="flex items-center gap-3">
+                                    {item.product?.images?.[0] || item.product?.image ? (
+                                      <div className="w-12 h-12 relative">
+                                        <Image
+                                          src={item.product.images?.[0] || item.product.image || ''}
+                                          alt={item.product.name}
+                                          fill
+                                          className="object-cover rounded-lg"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="w-12 h-12 bg-sage-800 rounded-lg flex items-center justify-center">
+                                        <Package className="h-6 w-6 text-sage-400" />
+                                      </div>
+                                    )}
+                                    <div>
+                                      <p className="text-white font-medium">
+                                        {item.product?.name || 'Product not found'}
+                                      </p>
+                                      <p className="text-sage-300 text-sm">Qty: {item.quantity}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-white font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                                    <p className="text-sage-300 text-sm">${item.price.toFixed(2)} each</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Order Summary */}
+                            <div className="border-t border-sage-800 pt-4">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sage-300">Total</span>
+                                <span className="text-xl font-bold text-white">${order.totalAmount.toFixed(2)}</span>
+                              </div>
+                            </div>
+
+                            {/* Tracking Information */}
+                            {order.tracking && (
+                              <div className="border-t border-sage-800 pt-4">
+                                <h4 className="text-white font-semibold mb-2">Tracking Information</h4>
+                                <div className="bg-sage-950 p-3 rounded-lg">
+                                  <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                      <span className="text-sage-300">Tracking #:</span>
+                                      <p className="text-white font-mono">{order.tracking.trackingNumber}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-sage-300">Carrier:</span>
+                                      <p className="text-white">{order.tracking.carrier}</p>
+                                    </div>
+                                    {order.tracking.shippedAt && (
+                                      <div>
+                                        <span className="text-sage-300">Shipped:</span>
+                                        <p className="text-white">{formatDate(order.tracking.shippedAt)}</p>
+                                      </div>
+                                    )}
+                                    {order.tracking.deliveredAt && (
+                                      <div>
+                                        <span className="text-sage-300">Delivered:</span>
+                                        <p className="text-white">{formatDate(order.tracking.deliveredAt)}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

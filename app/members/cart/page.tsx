@@ -8,13 +8,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Leaf, Minus, Plus, Trash2, QrCode, ShoppingBag, ArrowLeft } from "lucide-react"
+import { Leaf, Minus, Plus, Trash2, QrCode, ShoppingBag, ArrowLeft, CheckCircle, Loader2 } from "lucide-react"
 import { useApp } from "@/lib/context"
+import { useSession } from "next-auth/react"
+import { useToast } from "@/components/ui/use-toast"
+import { useRouter } from "next/navigation"
 
 export default function CartPage() {
   const { cart, removeFromCart, updateCartItemQuantity, clearCart } = useApp()
+  const { data: session } = useSession()
+  const { toast } = useToast()
+  const router = useRouter()
+  const [isCompletingOrder, setIsCompletingOrder] = useState(false)
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false)
 
-  const updateQuantity = (id: number, newQuantity: number) => {
+  const updateQuantity = (id: string | number, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeFromCart(id)
       return
@@ -25,6 +33,112 @@ export default function CartPage() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const tax = subtotal * 0.08 // 8% tax
   const total = subtotal + tax
+
+  const handleCompleteOrder = async () => {
+    if (!session?.user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to complete your order",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (cart.length === 0) {
+      toast({
+        title: "Empty Cart",
+        description: "Your cart is empty",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsCompletingOrder(true)
+
+    try {
+      // Get user data first
+      const userResponse = await fetch(`/api/users/${session.user.id}`);
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const userData = await userResponse.json();
+
+      // Create order data
+      const orderData = {
+        user: session.user.id,
+        items: cart.map(item => {
+          console.log('Cart item being processed:', item);
+          console.log('Product ID being sent:', item.productId || item.id);
+          return {
+            product: item.productId || item.id, // Use productId if available, fallback to id
+            quantity: item.quantity,
+            price: item.price,
+          };
+        }),
+        totalAmount: total,
+        status: 'pending',
+        paymentStatus: 'completed',
+        paymentMethod: 'qr_code',
+        customerInfo: {
+          firstName: userData.firstName || '',
+          lastName: userData.lastName || '',
+          email: userData.email || session.user.email || '',
+          phone: userData.phoneNumber || userData.phone || '',
+        },
+        shippingAddress: {
+          street: userData.address?.street || '',
+          city: userData.address?.city || '',
+          state: userData.address?.state || '',
+          zipCode: userData.address?.zipCode || '',
+        },
+      }
+
+      console.log('Creating order with data:', orderData);
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create order');
+      }
+
+      const order = await response.json()
+
+      // Clear cart after successful order
+      clearCart()
+
+      toast({
+        title: "Order Completed!",
+        description: `Your order #${order._id} has been successfully created.`,
+      })
+
+      // Redirect to order confirmation or profile
+      router.push('/members/profile')
+    } catch (error) {
+      console.error('Error completing order:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to complete order. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsCompletingOrder(false)
+    }
+  }
+
+  const handlePaymentConfirmation = () => {
+    setPaymentConfirmed(true)
+    toast({
+      title: "Payment Confirmed",
+      description: "Payment received! You can now complete your order.",
+    })
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -50,6 +164,28 @@ export default function CartPage() {
         <div className="mb-8">
           <h1 className="text-4xl font-display font-bold text-white mb-2">Shopping Cart</h1>
           <p className="text-xl text-sage-300">Review your premium cannabis selection</p>
+          <div className="mt-4 flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                console.log('Current cart contents:', cart);
+                clearCart();
+                console.log('Cart cleared');
+              }}
+              className="border-red-600 text-red-400 hover:bg-red-900"
+            >
+              Debug: Clear Cart
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                console.log('Current cart contents:', cart);
+              }}
+              className="border-blue-600 text-blue-400 hover:bg-blue-900"
+            >
+              Debug: Log Cart
+            </Button>
+          </div>
         </div>
 
         {cart.length === 0 ? (
@@ -185,17 +321,56 @@ export default function CartPage() {
                     QR Code Payment
                   </CardTitle>
                   <CardDescription className="text-sage-300">
-                    Scan the QR code below to complete your payment securely
+                    {paymentConfirmed 
+                      ? "Payment confirmed! Complete your order below."
+                      : "Scan the QR code below to complete your payment securely"
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <div className="bg-white p-6 rounded-lg mb-4 inline-block">
-                    <QrCode className="h-32 w-32 text-black mx-auto" />
-                  </div>
-                  <p className="text-sage-300 text-sm mb-4">
-                    Total: <span className="font-bold text-white">${total.toFixed(2)}</span>
-                  </p>
-                  <Button className="w-full premium-gradient text-white">Generate Payment QR Code</Button>
+                  {!paymentConfirmed ? (
+                    <>
+                      <div className="bg-white p-6 rounded-lg mb-4 inline-block">
+                        <QrCode className="h-32 w-32 text-black mx-auto" />
+                      </div>
+                      <p className="text-sage-300 text-sm mb-4">
+                        Total: <span className="font-bold text-white">${total.toFixed(2)}</span>
+                      </p>
+                      <Button 
+                        className="w-full premium-gradient text-white" 
+                        onClick={handlePaymentConfirmation}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Confirm Payment
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="bg-green-900 p-6 rounded-lg mb-4 inline-block">
+                        <CheckCircle className="h-32 w-32 text-green-400 mx-auto" />
+                      </div>
+                      <p className="text-green-400 text-sm mb-4 font-semibold">
+                        Payment Confirmed! ✅
+                      </p>
+                      <Button 
+                        className="w-full bg-green-600 hover:bg-green-700 text-white" 
+                        onClick={handleCompleteOrder}
+                        disabled={isCompletingOrder}
+                      >
+                        {isCompletingOrder ? (
+                          <>
+                            <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                            Creating Order...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Complete Order
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  )}
                 </CardContent>
               </Card>
 

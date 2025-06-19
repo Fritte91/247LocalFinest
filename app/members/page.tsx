@@ -26,7 +26,8 @@ interface Grower {
 }
 
 interface Product {
-  id: number;
+  _id?: string;
+  id: string | number;
   name: string;
   category: "flowers" | "glassware" | "artwork";
   subcategory?: string;
@@ -171,8 +172,12 @@ export default function MembersShop() {
   }
 
   const addToCartHandler = (product: Product) => {
+    console.log('Adding product to cart:', product);
+    console.log('Product ID being added:', product.id);
+    
     const cartItem = {
       id: product.id,
+      productId: product.id,
       name: product.name,
       price: product.price,
       quantity: 1,
@@ -184,6 +189,7 @@ export default function MembersShop() {
       cbd: product.cbd,
       strain: product.strain,
     }
+    console.log('Cart item being created:', cartItem);
     addToCart(cartItem)
   }
 

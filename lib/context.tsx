@@ -11,7 +11,8 @@ interface User {
 }
 
 interface CartItem {
-  id: number
+  id: string | number
+  productId?: string // MongoDB product ID for order creation
   name: string
   price: number
   quantity: number
@@ -25,7 +26,7 @@ interface CartItem {
 }
 
 interface WishlistItem {
-  id: number
+  id: string | number
   name: string
   price: number
   image: string
@@ -43,12 +44,12 @@ interface AppContextType {
   login: (userData: User) => void
   logout: () => void
   addToCart: (item: CartItem) => void
-  removeFromCart: (itemId: number) => void
-  updateCartItemQuantity: (itemId: number, quantity: number) => void
+  removeFromCart: (itemId: string | number) => void
+  updateCartItemQuantity: (itemId: string | number, quantity: number) => void
   clearCart: () => void
   addToWishlist: (item: WishlistItem) => void
-  removeFromWishlist: (id: number) => void
-  isInWishlist: (id: number) => boolean
+  removeFromWishlist: (id: string | number) => void
+  isInWishlist: (id: string | number) => boolean
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -81,24 +82,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   const addToCart = (item: CartItem) => {
+    console.log('addToCart called with item:', item);
     setCart((prevCart) => {
+      console.log('Previous cart:', prevCart);
       const existingItem = prevCart.find((cartItem) => cartItem.id === item.id)
       if (existingItem) {
+        console.log('Item already exists, updating quantity');
         return prevCart.map((cartItem) =>
           cartItem.id === item.id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
         )
       }
+      console.log('Adding new item to cart');
       return [...prevCart, item]
     })
   }
 
-  const removeFromCart = (itemId: number) => {
+  const removeFromCart = (itemId: string | number) => {
     setCart((prevCart) => prevCart.filter((item) => item.id !== itemId))
   }
 
-  const updateCartItemQuantity = (itemId: number, quantity: number) => {
+  const updateCartItemQuantity = (itemId: string | number, quantity: number) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
         item.id === itemId ? { ...item, quantity: Math.max(0, quantity) } : item
@@ -119,11 +124,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const removeFromWishlist = (id: number) => {
+  const removeFromWishlist = (id: string | number) => {
     setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== id))
   }
 
-  const isInWishlist = (id: number) => {
+  const isInWishlist = (id: string | number) => {
     return wishlist.some((item) => item.id === id)
   }
 
