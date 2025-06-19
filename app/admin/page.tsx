@@ -31,6 +31,8 @@ import {
   XCircle,
   MapPin,
   Save,
+  ShoppingBag,
+  BarChart,
 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import Image from "next/image"
@@ -113,6 +115,7 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState<string | null>(null)
   const [totalMembers, setTotalMembers] = useState<number>(0)
   const [isAddProductOpen, setIsAddProductOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("products")
 
   // Redirect if not admin
   useEffect(() => {
@@ -522,21 +525,21 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/members">
-              <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white">
+              <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300">
                 <Eye className="h-4 w-4 mr-2" />
                 View Shop
               </Button>
             </Link>
             <Link href="/members/profile">
-              <Button variant="outline" className="border-sage-700 text-sage-300 hover:bg-sage-800 hover:text-white">
+              <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300">
                 <User className="h-4 w-4 mr-2" />
                 Back to Profile
               </Button>
             </Link>
-            <Button
-              variant="destructive"
-              className="border-red-700 text-white bg-red-600 hover:bg-red-700 hover:text-white"
-              onClick={handleLogout}
+            <Button 
+              variant="default" 
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              onClick={() => signOut()}
             >
               <LogOut className="h-4 w-4 mr-2" />
               Logout
@@ -724,14 +727,14 @@ export default function AdminDashboard() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => setEditingProduct(product._id)}
-                                className="border-sage-600 text-sage-300 hover:bg-sage-800"
+                                className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-red-600 text-red-400 hover:bg-red-900"
+                                className="bg-sage-900 border-red-500 text-red-400 hover:bg-red-900/50 hover:text-red-300"
                                 onClick={() => handleDeleteProduct(product._id)}
                               >
                                 <Trash2 className="h-4 w-4" />

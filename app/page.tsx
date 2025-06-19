@@ -72,14 +72,20 @@ export default function HomePage() {
               <Link href="#promotions" className="text-sage-300 hover:text-white font-medium transition-colors">
                 Promotions
               </Link>
-              <Link href="/signin">
-                <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
-                  Sign In
+              <div className="flex items-center gap-4">
+                <Link href="/members">
+                  <Button className="premium-gradient text-white font-medium shadow-lg shadow-forest-900/20">
+                    Explore Collection
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300"
+                >
+                  Learn More
                 </Button>
-              </Link>
-              <Button className="premium-gradient text-white font-semibold" onClick={() => setIsSignupOpen(true)}>
-                Join Members
-              </Button>
+              </div>
             </nav>
           </div>
         </div>
@@ -108,21 +114,25 @@ export default function HomePage() {
             <div 
               className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in animation-delay-500"
             >
-              <Button
-                size="lg"
-                className="premium-gradient text-white px-10 py-6 text-lg font-semibold hover:scale-105 transition-transform duration-300 shadow-lg shadow-forest-500/20"
-                onClick={() => setIsSignupOpen(true)}
-              >
-                Explore Collection
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-sage-600 text-sage-300 hover:bg-sage-800/50 px-10 py-6 text-lg backdrop-blur-sm"
-              >
-                Learn More
-              </Button>
+              <div className="flex items-center gap-4">
+                <Link href="/members">
+                  <Button
+                    size="lg"
+                    className="premium-gradient text-white px-10 py-6 text-lg font-semibold hover:scale-105 transition-transform duration-300 shadow-lg shadow-forest-900/20"
+                    onClick={() => setIsSignupOpen(true)}
+                  >
+                    Explore Collection
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </Link>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 px-10 py-6 text-lg backdrop-blur-sm"
+                >
+                  Learn More
+                </Button>
+              </div>
             </div>
           </div>
         </div>

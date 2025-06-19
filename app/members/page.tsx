@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Leaf, Search, ShoppingCart, Star, User, Grid, List, Filter, Clock, Award, MapPin, Heart } from "lucide-react"
@@ -499,7 +499,7 @@ export default function MembersShop() {
                 Growers
               </Link>
               <Link href="/members/cart">
-                <Button variant="outline" className="relative border-sage-600 text-sage-300 hover:bg-sage-800/50 hover:text-white transition-all duration-300">
+                <Button variant="outline" className="relative">
                   <ShoppingCart className="h-4 w-4" />
                   {cart.length > 0 && (
                     <Badge className="absolute -top-2 -right-2 gold-gradient text-white text-xs animate-pulse">
@@ -509,7 +509,7 @@ export default function MembersShop() {
                 </Button>
               </Link>
               <Link href="/members/profile">
-                <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800/50 hover:text-white transition-all duration-300">
+                <Button variant="outline">
                   <User className="h-4 w-4 mr-2" />
                   Profile
                 </Button>
@@ -556,22 +556,22 @@ export default function MembersShop() {
                 <div className="flex gap-2">
                   <Button 
                     onClick={() => setSelectedCategory("flowers")} 
-                    className="border-sage-700 text-sage-300 hover:bg-forest-700 hover:text-white transition-all duration-300"
                     variant="outline"
+                    isActive={selectedCategory === "flowers"}
                   >
                     Flowers
                   </Button>
                   <Button 
                     onClick={() => setSelectedCategory("glassware")} 
-                    className="border-sage-700 text-sage-300 hover:bg-forest-700 hover:text-white transition-all duration-300"
                     variant="outline"
+                    isActive={selectedCategory === "glassware"}
                   >
                     Glassware
                   </Button>
                   <Button 
                     onClick={() => setSelectedCategory("artwork")} 
-                    className="border-sage-700 text-sage-300 hover:bg-forest-700 hover:text-white transition-all duration-300"
                     variant="outline"
+                    isActive={selectedCategory === "artwork"}
                   >
                     Artwork
                   </Button>
@@ -607,28 +607,20 @@ export default function MembersShop() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Button
-                    variant={selectedSubCategory === "all" ? "default" : "outline"}
+                    variant="outline"
                     size="sm"
                     onClick={() => setSelectedSubCategory("all")}
-                    className={
-                      selectedSubCategory === "all"
-                        ? "gold-gradient text-white font-medium text-base px-6 py-2 shadow-lg shadow-gold-900/20"
-                        : "border-sage-700 text-sage-400 hover:bg-sage-900 hover:text-sage-300 text-base px-6 py-2"
-                    }
+                    isActive={selectedSubCategory === "all"}
                   >
                     All {categories[selectedCategory].name}
                   </Button>
                   {categories[selectedCategory].subcategories.map((sub: { id: string; name: string }) => (
                     <Button
                       key={sub.id}
-                      variant={selectedSubCategory === sub.id ? "default" : "outline"}
+                      variant="outline"
                       size="sm"
                       onClick={() => setSelectedSubCategory(sub.id)}
-                      className={
-                        selectedSubCategory === sub.id
-                          ? "gold-gradient text-white font-medium text-base px-6 py-2 shadow-lg shadow-gold-900/20"
-                          : "border-sage-700 text-sage-400 hover:bg-sage-900 hover:text-sage-300 text-base px-6 py-2"
-                      }
+                      isActive={selectedSubCategory === sub.id}
                     >
                       {sub.name}
                     </Button>
@@ -649,19 +641,19 @@ export default function MembersShop() {
           </div>
           <div className="flex gap-3">
             <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
+              variant="outline"
               size="sm"
               onClick={() => setViewMode("grid")}
-              className={viewMode === "grid" ? "premium-gradient shadow-lg shadow-forest-900/20" : "border-sage-600 text-sage-300 hover:bg-sage-900"}
+              isActive={viewMode === "grid"}
             >
               <Grid className="h-4 w-4 mr-2" />
               Grid
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "outline"}
+              variant="outline"
               size="sm"
               onClick={() => setViewMode("list")}
-              className={viewMode === "list" ? "premium-gradient shadow-lg shadow-forest-900/20" : "border-sage-600 text-sage-300 hover:bg-sage-900"}
+              isActive={viewMode === "list"}
             >
               <List className="h-4 w-4 mr-2" />
               List

@@ -1,0 +1,33 @@
+# Cart and Profile Buttons
+<Button variant="outline" className="relative bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 transition-all duration-300">
+
+# Filter Buttons
+<Button 
+  variant="outline"
+  className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 transition-all duration-300"
+>
+
+# View Toggle Buttons (Grid/List)
+<Button
+  variant={viewMode === "grid" ? "default" : "outline"}
+  size="sm"
+  onClick={() => setViewMode("grid")}
+  className={viewMode === "grid" ? 
+    "premium-gradient shadow-lg shadow-forest-900/20" : 
+    "bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300"}
+>
+
+# Category Buttons
+<Button
+  variant={selectedCategory === category ? "default" : "outline"}
+  size="sm"
+  className={selectedCategory === category ? 
+    "premium-gradient shadow-lg shadow-forest-900/20" : 
+    "bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300"}
+>
+
+# Continue Shopping Button (in cart)
+<Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300">
+  <ArrowLeft className="h-4 w-4 mr-2" />
+  Continue Shopping
+</Button> 

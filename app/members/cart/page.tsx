@@ -151,7 +151,7 @@ export default function CartPage() {
               <span className="text-2xl font-display font-bold text-white">247LocalFinest</span>
             </Link>
             <Link href="/members">
-              <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
+              <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Continue Shopping
               </Button>
@@ -232,7 +232,7 @@ export default function CartPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => removeFromCart(item.id)}
-                            className="border-red-600 text-red-400 hover:bg-red-900"
+                            className="bg-sage-900 border-red-500 text-red-400 hover:bg-red-900/50 hover:text-red-300"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -258,7 +258,7 @@ export default function CartPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="border-sage-600 text-sage-300 hover:bg-sage-800 h-8 w-8 p-0"
+                              className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 h-8 w-8 p-0"
                             >
                               <Minus className="h-4 w-4" />
                             </Button>
@@ -273,7 +273,7 @@ export default function CartPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="border-sage-600 text-sage-300 hover:bg-sage-800 h-8 w-8 p-0"
+                              className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 h-8 w-8 p-0"
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
