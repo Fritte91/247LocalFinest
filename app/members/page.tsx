@@ -8,7 +8,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Leaf, Search, ShoppingCart, Star, User, Grid, List, Filter, Clock, Award, MapPin, Heart, Menu, X } from "lucide-react"
 import type { ChangeEvent, MouseEvent } from "react"
@@ -28,7 +28,7 @@ interface Grower {
 
 interface Product {
   _id?: string;
-  id: string | number;
+  id: string;
   name: string;
   category: "flowers" | "glassware" | "artwork";
   subcategory?: string;
@@ -132,8 +132,8 @@ export default function MembersShop() {
             thc: item.thc ? parseFloat(item.thc) : undefined,
             cbd: item.cbd ? parseFloat(item.cbd) : undefined,
             strain: item.strain,
-            indicaPercent: item.indicaRatio ? parseInt(item.indicaRatio) : undefined,
-            sativaPercent: item.sativaRatio ? parseInt(item.sativaRatio) : undefined,
+            indicaPercent: item.indica ? parseInt(item.indica) : undefined,
+            sativaPercent: item.sativa ? parseInt(item.sativa) : undefined,
             rating: item.rating || 4.5,
             reviews: item.reviews || 0,
             inStock: item.stock,
@@ -174,10 +174,7 @@ export default function MembersShop() {
   }
 
   const addToCartHandler = (product: Product) => {
-    console.log('Adding product to cart:', product);
-    console.log('Product ID being added:', product.id);
-    
-    const cartItem = {
+    const cartItem: CartItem = {
       id: product.id,
       productId: product.id,
       name: product.name,
@@ -191,9 +188,123 @@ export default function MembersShop() {
       cbd: product.cbd,
       strain: product.strain,
     }
-    console.log('Cart item being created:', cartItem);
     addToCart(cartItem)
+    toast.success(`${product.name} has been added to your cart.`)
   }
+
+  const handleWishlistToggle = (product: Product, e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id)
+      toast.info(`${product.name} removed from wishlist.`)
+    } else {
+      addToWishlist(product.id)
+      toast.success(`${product.name} added to wishlist!`)
+    }
+  }
+
+  const ProductCard = ({ product }: { product: Product }) => (
+    <Card
+      className="bg-sage-950/70 border-sage-800/70 overflow-hidden group cursor-pointer"
+      onClick={() => setSelectedProduct(product)}
+    >
+      <div className="relative">
+        <Image
+          src={product.images[0] || "/placeholder.svg"}
+          alt={product.name}
+          width={400}
+          height={400}
+          className="w-full h-64 object-contain transition-transform duration-500 group-hover:scale-105"
+        />
+        {product.lowStock && (
+          <Badge className="absolute top-3 left-3 bg-gold-600 text-white">
+            <Clock className="h-3 w-3 mr-1" />
+            Low Stock!
+          </Badge>
+        )}
+        <Button 
+          className="absolute top-3 right-3 h-9 w-9 p-0 rounded-full bg-black/50 text-white hover:bg-forest-500/80 backdrop-blur-sm"
+          onClick={(e) => handleWishlistToggle(product, e)}
+        >
+          <Heart className={`h-5 w-5 ${isInWishlist(product.id) ? 'fill-current text-forest-500' : ''}`} />
+        </Button>
+      </div>
+      <div className="p-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-xl font-display text-white truncate mb-1">{product.name}</h3>
+            <p className="text-sage-300 capitalize">{product.subcategory || product.category}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <Star className="h-5 w-5 text-gold-500 fill-current" />
+            <span className="text-white">{product.rating.toFixed(1)}</span>
+          </div>
+        </div>
+        <div className="mt-4 flex justify-between items-center">
+          <p className="text-2xl font-bold text-white">฿{product.price.toFixed(2)}</p>
+          <Button 
+            className="premium-gradient" 
+            onClick={(e) => {
+              e.stopPropagation()
+              addToCartHandler(product)
+            }}
+          >
+            Add to Cart
+          </Button>
+        </div>
+      </div>
+    </Card>
+  )
+
+  const ProductListItem = ({ product }: { product: Product }) => (
+    <Card
+      className="bg-sage-950/70 border-sage-800/70 overflow-hidden group cursor-pointer w-full"
+      onClick={() => setSelectedProduct(product)}
+    >
+      <div className="flex">
+        <div className="relative w-1/4">
+          <Image
+            src={product.images[0] || "/placeholder.svg"}
+            alt={product.name}
+            width={200}
+            height={200}
+            className="w-full h-full object-contain p-2"
+          />
+        </div>
+        <div className="p-6 flex-1 flex justify-between">
+          <div>
+            <h3 className="text-xl font-display text-white truncate mb-1">{product.name}</h3>
+            <p className="text-sage-300 capitalize">{product.subcategory || product.category}</p>
+            <div className="flex items-center gap-1 mt-2">
+              <Star className="h-5 w-5 text-gold-500 fill-current" />
+              <span className="text-white">{product.rating.toFixed(1)}</span>
+            </div>
+            <p className="mt-2 text-sm text-sage-400 max-w-md">{product.description}</p>
+          </div>
+          <div className="flex flex-col items-end justify-between">
+            <p className="text-2xl font-bold text-white">฿{product.price.toFixed(2)}</p>
+            <div className="flex gap-2 mt-4">
+              <Button 
+                className="h-9 w-9 p-0 rounded-full bg-black/50 text-white hover:bg-forest-500/80 backdrop-blur-sm"
+                onClick={(e) => handleWishlistToggle(product, e)}
+              >
+                <Heart className={`h-5 w-5 ${isInWishlist(product.id) ? 'fill-current text-forest-500' : ''}`} />
+              </Button>
+              <Button 
+                className="premium-gradient"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  addToCartHandler(product)
+                }}
+              >
+                Add to Cart
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+  )
 
   const ProductDetailDialog = ({ product, onClose }: { product: Product | null; onClose: () => void }) => {
     if (!product) return null;
@@ -265,7 +376,7 @@ export default function MembersShop() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-white">${product.price}</div>
+                    <div className="text-3xl font-bold text-white">฿{product.price.toFixed(2)}</div>
                     <div className={`text-sm ${product.inStock > 0 ? 'text-forest-400' : 'text-red-400'}`}>
                       {product.inStock > 0 ? `${product.inStock} in stock` : "Out of stock"}
                     </div>
@@ -280,38 +391,39 @@ export default function MembersShop() {
               {/* Cannabis-specific info */}
               {product.category === "flowers" && (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-sage-900/30 rounded-lg p-4 border border-sage-800/50">
-                      <div className="text-sm text-sage-400 mb-1">THC Content</div>
-                      <div className="flex items-center gap-2">
-                        <Progress value={product.thc} max={30} className="flex-1" />
-                        <span className="text-forest-400 font-bold">{product.thc}%</span>
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    {product.thc && (
+                      <div className="bg-sage-900 p-3 rounded-lg">
+                        <div className="text-sm text-sage-400 mb-1">THC Content</div>
+                        <div className="text-lg font-bold text-white">{product.thc}%</div>
                       </div>
-                    </div>
-                    <div className="bg-sage-900/30 rounded-lg p-4 border border-sage-800/50">
-                      <div className="text-sm text-sage-400 mb-1">CBD Content</div>
-                      <div className="flex items-center gap-2">
-                        <Progress value={product.cbd} max={20} className="flex-1" />
-                        <span className="text-forest-400 font-bold">{product.cbd}%</span>
+                    )}
+                    {product.cbd && (
+                      <div className="bg-sage-900 p-3 rounded-lg">
+                        <div className="text-sm text-sage-400 mb-1">CBD Content</div>
+                        <div className="text-lg font-bold text-white">{product.cbd}%</div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
-                  <div className="bg-sage-900/30 rounded-lg p-4 border border-sage-800/50">
-                    <div className="text-sm text-sage-400 mb-2">Strain Composition</div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sage-300">Indica</span>
-                        <span className="text-purple-400 font-bold">{product.indicaPercent}%</span>
-                      </div>
-                      <Progress value={product.indicaPercent} className="h-2" />
-                      <div className="flex justify-between items-center">
-                        <span className="text-sage-300">Sativa</span>
-                        <span className="text-forest-400 font-bold">{product.sativaPercent}%</span>
-                      </div>
-                      <Progress value={product.sativaPercent} className="h-2" />
+                  {product.category === 'flowers' && (product.sativaPercent || product.indicaPercent) && (
+                    <div className="mt-4">
+                      <div className="text-sm text-sage-400 mb-2">Strain Composition</div>
+                      {product.sativaPercent && (
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-white">Sativa</span>
+                          <span className="text-white font-semibold">{product.sativaPercent}%</span>
+                        </div>
+                      )}
+                      <Progress value={(product.sativaPercent || 0) + (product.indicaPercent || 0)} className="w-full [&>div]:bg-gradient-to-r [&>div]:from-green-400 [&>div]:to-purple-500" />
+                      {product.indicaPercent && (
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-white">Indica</span>
+                          <span className="text-white font-semibold">{product.indicaPercent}%</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
 
                   {product.effects && (
                     <div className="mb-4">
@@ -441,38 +553,23 @@ export default function MembersShop() {
                       : "text-sage-300 hover:text-white hover:bg-forest-700/60"
                   }`}
                   onClick={(e) => {
-                    e.stopPropagation();
-                    if (isInWishlist(product.id)) {
-                      removeFromWishlist(product.id);
-                      toast.success("Removed from wishlist");
-                    } else {
-                      addToWishlist({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        image: product.images?.[0] || "",
-                        category: product.category,
-                        grower: product.grower?.name,
-                        artist: product.artist
-                      });
-                      toast.success("Added to wishlist");
-                    }
+                    handleWishlistToggle(product, e)
                   }}
                 >
                   <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-current" : ""}`} />
                 </Button>
               </div>
 
-              <Button
-                className={`w-full mt-6 ${product.inStock > 0 ? "premium-gradient" : "bg-gray-600"} text-white py-4 text-lg hover:shadow-lg hover:shadow-forest-900/30 transition-all duration-300`}
-                disabled={product.inStock === 0}
-                onClick={() => {
-                  addToCartHandler(product)
-                  onClose()
-                }}
-              >
-                {product.inStock > 0 ? "Add to Cart" : "Out of Stock"}
-              </Button>
+              <DialogFooter className="mt-8 pt-6 border-t border-sage-800 flex sm:justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-bold text-white">฿{product.price.toFixed(2)}</span>
+                  <Badge variant="outline" className="border-forest-500 text-forest-400">In Stock</Badge>
+                </div>
+                <Button size="lg" className="premium-gradient" onClick={() => addToCartHandler(product)}>
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  Add to Cart
+                </Button>
+              </DialogFooter>
             </div>
           </div>
         </DialogContent>
@@ -651,79 +748,11 @@ export default function MembersShop() {
             ))
           ) : (
             filteredProducts.map((product) => (
-              <Card
-                key={product.id}
-                className={`bg-sage-950/70 border-sage-800/70 hover:border-forest-600 hover:shadow-xl hover:shadow-forest-900/10 transition-all duration-300 overflow-hidden group cursor-pointer backdrop-blur-sm ${
-                  viewMode === "list" ? "flex items-center" : ""
-                }`}
-                onClick={() => setSelectedProduct(product)}
-              >
-                <div className={viewMode === "list" ? "w-32 h-32 flex-shrink-0 relative" : "relative"}>
-                  <Image
-                    src={product.images?.[0] || "/placeholder.svg"}
-                    alt={product.name}
-                    width={300}
-                    height={300}
-                    className={`object-cover transition-all duration-500 group-hover:scale-110 ${
-                      viewMode === "list" ? "w-full h-full" : "w-full h-48"
-                    }`}
-                  />
-                  {product.lowStock && (
-                    <Badge className="absolute top-2 right-2 bg-gold-600 text-white text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Low Stock
-                    </Badge>
-                  )}
-                  <Badge className="absolute top-2 left-2 premium-gradient text-white capitalize text-xs">
-                    {product.category}
-                  </Badge>
-                </div>
-
-                <div className={`p-4 ${viewMode === "list" ? "flex-1 flex items-center gap-4" : ""}`}>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start gap-2 mb-2">
-                      <h3 className="text-white font-medium text-sm md:text-base line-clamp-1">{product.name}</h3>
-                      <div className="flex items-center gap-1 bg-sage-900/60 px-1.5 py-0.5 rounded">
-                        <Star className="h-3 w-3 fill-gold-400 text-gold-400" />
-                        <span className="text-xs font-medium text-white">{product.rating}</span>
-                      </div>
-                    </div>
-                    {viewMode === "list" ? (
-                      <>
-                        <p className="text-sage-300 text-sm mb-2 line-clamp-2">{product.description}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {product.thc && <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">THC: {product.thc}%</Badge>}
-                          {product.cbd && <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">CBD: {product.cbd}%</Badge>}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sage-300 text-xs mb-2 line-clamp-2">{product.description}</p>
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {product.thc && <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">THC: {product.thc}%</Badge>}
-                          {product.cbd && <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">CBD: {product.cbd}%</Badge>}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className={viewMode === "list" ? "flex items-center gap-4" : "flex items-center justify-between mt-2"}>
-                    <div className="text-white font-bold">${product.price}</div>
-                    {viewMode === "grid" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-forest-600 text-white border-0 hover:bg-forest-700"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCart(product);
-                        }}
-                      >
-                        Add
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </Card>
+              viewMode === "grid" ? (
+                <ProductCard key={product.id} product={product} />
+              ) : (
+                <ProductListItem key={product.id} product={product} />
+              )
             ))
           )}
         </div>

@@ -58,6 +58,8 @@ interface Product {
   terpenes?: string;
   flavors?: string;
   images: string[];
+  sativa?: number;
+  indica?: number;
 }
 
 interface NewProduct {
@@ -75,8 +77,8 @@ interface NewProduct {
   terpenes: string;
   flavors: string;
   images: string[];
-  sativaRatio: string;
-  indicaRatio: string;
+  sativa: string;
+  indica: string;
 }
 
 export default function AdminDashboard() {
@@ -108,8 +110,8 @@ export default function AdminDashboard() {
     terpenes: "",
     flavors: "",
     images: [],
-    sativaRatio: "",
-    indicaRatio: ""
+    sativa: "",
+    indica: ""
   })
   const [selectedImages, setSelectedImages] = useState<File[]>([])
   const [editingProduct, setEditingProduct] = useState<string | null>(null)
@@ -342,7 +344,7 @@ export default function AdminDashboard() {
         imageUrls = await uploadImages()
       }
 
-      const productData = {
+      const productData: any = {
         name: newProduct.name,
         category: newProduct.category,
         subcategory: newProduct.subcategory || undefined,
@@ -359,6 +361,11 @@ export default function AdminDashboard() {
         images: imageUrls,
         status: Number.parseInt(newProduct.stock) > 10 ? "active" : 
                 Number.parseInt(newProduct.stock) > 0 ? "low_stock" : "out_of_stock"
+      }
+
+      if (newProduct.category.toLowerCase() === 'flowers') {
+        (productData as any).sativa = Number.parseInt(newProduct.sativa) || undefined;
+        (productData as any).indica = Number.parseInt(newProduct.indica) || undefined;
       }
 
       const response = await fetch('/api/admin/products', {
@@ -392,8 +399,8 @@ export default function AdminDashboard() {
         terpenes: "",
         flavors: "",
         images: [],
-        sativaRatio: "",
-        indicaRatio: ""
+        sativa: "",
+        indica: ""
       })
       setSelectedImages([])
       setIsAddProductOpen(false)
@@ -760,11 +767,11 @@ export default function AdminDashboard() {
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="productName" className="text-sage-300 font-medium">
+                    <Label htmlFor="product-name" className="text-sage-300 font-medium">
                       Product Name *
                     </Label>
                     <Input
-                      id="productName"
+                      id="product-name"
                       value={newProduct.name}
                       onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                       placeholder="Enter product name"
@@ -910,28 +917,34 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="sativaRatio" className="text-sage-300">Sativa %</Label>
-                  <Input
-                    id="sativaRatio"
-                    type="number"
-                    placeholder="e.g. 60"
-                    value={newProduct.sativaRatio}
-                    onChange={e => setNewProduct(prev => ({ ...prev, sativaRatio: e.target.value }))}
-                    className="bg-sage-900 border-sage-700 text-white"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="indicaRatio" className="text-sage-300">Indica %</Label>
-                  <Input
-                    id="indicaRatio"
-                    type="number"
-                    placeholder="e.g. 40"
-                    value={newProduct.indicaRatio}
-                    onChange={e => setNewProduct(prev => ({ ...prev, indicaRatio: e.target.value }))}
-                    className="bg-sage-900 border-sage-700 text-white"
-                  />
-                </div>
+                {newProduct.category === "flowers" && (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="sativa" className="text-sage-300 font-medium">
+                        Sativa %
+                      </Label>
+                      <Input
+                        id="sativa"
+                        value={newProduct.sativa}
+                        onChange={(e) => setNewProduct({ ...newProduct, sativa: e.target.value })}
+                        placeholder="e.g. 60"
+                        className="mt-2 bg-black border-sage-700 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="indica" className="text-sage-300 font-medium">
+                        Indica %
+                      </Label>
+                      <Input
+                        id="indica"
+                        value={newProduct.indica}
+                        onChange={(e) => setNewProduct({ ...newProduct, indica: e.target.value })}
+                        placeholder="e.g. 40"
+                        className="mt-2 bg-black border-sage-700 text-white"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Tags Section */}
                 <div className="space-y-4">

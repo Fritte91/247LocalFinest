@@ -22,7 +22,7 @@ export default function CartPage() {
   const [isCompletingOrder, setIsCompletingOrder] = useState(false)
   const [paymentConfirmed, setPaymentConfirmed] = useState(false)
 
-  const updateQuantity = (id: string | number, newQuantity: number) => {
+  const updateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeFromCart(id)
       return
@@ -31,8 +31,8 @@ export default function CartPage() {
   }
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const tax = subtotal * 0.08 // 8% tax
-  const total = subtotal + tax
+  const shippingFee = 50;
+  const total = subtotal + shippingFee
 
   const handleCompleteOrder = async () => {
     if (!session?.user) {
@@ -203,7 +203,7 @@ export default function CartPage() {
                           <div>
                             <h3 className="text-xl font-display font-semibold text-white">{item.name}</h3>
                             <p className="text-sage-300">
-                              {item.grower ? `By ${item.grower}` : item.artist ? `By ${item.artist}` : null} • ${item.price.toFixed(2)} each
+                              {item.grower ? `By ${item.grower}` : item.artist ? `By ${item.artist}` : null} • ฿{item.price.toFixed(2)} each
                             </p>
                           </div>
                           <Button
@@ -278,16 +278,16 @@ export default function CartPage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between text-sage-300">
                     <span>Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>฿{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sage-300">
-                    <span>Tax (8%)</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>Shipping</span>
+                    <span>฿{shippingFee.toFixed(2)}</span>
                   </div>
                   <Separator className="bg-sage-700" />
                   <div className="flex justify-between text-xl font-bold text-white">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>฿{total.toFixed(2)}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -312,7 +312,7 @@ export default function CartPage() {
                         <QrCode className="h-32 w-32 text-black mx-auto" />
                       </div>
                       <p className="text-sage-300 text-sm mb-4">
-                        Total: <span className="font-bold text-white">${total.toFixed(2)}</span>
+                        Total: <span className="font-bold text-white">฿{total.toFixed(2)}</span>
                       </p>
                       <Button 
                         className="w-full premium-gradient text-white" 

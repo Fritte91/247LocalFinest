@@ -41,6 +41,8 @@ const productSchema = new mongoose.Schema({
   // Optional fields for flowers
   thc: { type: String },
   cbd: { type: String },
+  sativa: { type: Number },
+  indica: { type: Number },
   effects: { type: String }, // comma-separated string
   terpenes: { type: String }, // comma-separated string
   flavors: { type: String }, // comma-separated string
