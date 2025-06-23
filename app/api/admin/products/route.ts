@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     await connectDB();
     
     // Validate required fields
-    const requiredFields = ['name', 'category', 'price', 'stock'];
+    const requiredFields = ['name', 'category', 'retailPrice', 'wholesalePrice', 'stock'];
     const missingFields = requiredFields.filter(field => !body[field]);
     
     if (missingFields.length > 0) {
@@ -57,7 +57,8 @@ export async function POST(request: Request) {
     // Convert string values to numbers and ensure proper types
     const productData = {
       ...body,
-      price: Number(body.price),
+      retailPrice: Number(body.retailPrice),
+      wholesalePrice: Number(body.wholesalePrice),
       stock: Number(body.stock),
       status: body.stock > 10 ? 'active' : body.stock > 0 ? 'low_stock' : 'out_of_stock',
       images: Array.isArray(body.images) ? body.images : [],
@@ -97,10 +98,38 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { _id, ...updates } = body;
+    const { id, ...updates } = body;
     
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Product ID is required' },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
-    const product = await Product.findByIdAndUpdate(_id, updates, { new: true });
+    
+    // Handle price updates
+    if (updates.retailPrice !== undefined) {
+      updates.retailPrice = Number(updates.retailPrice);
+    }
+    if (updates.wholesalePrice !== undefined) {
+      updates.wholesalePrice = Number(updates.wholesalePrice);
+    }
+    
+    // Handle stock updates and status
+    if (updates.stock !== undefined) {
+      updates.stock = Number(updates.stock);
+      updates.status = updates.stock > 10 ? 'active' : updates.stock > 0 ? 'low_stock' : 'out_of_stock';
+    }
+    
+    updates.updatedAt = new Date();
+    
+    const product = await Product.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true }
+    );
     
     if (!product) {
       return NextResponse.json(

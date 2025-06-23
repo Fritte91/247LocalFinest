@@ -23,9 +23,14 @@ const productSchema = new mongoose.Schema({
       'prints', 'sculptures', 'photography'
     ],
   },
-  price: {
+  retailPrice: {
     type: Number,
-    required: [true, 'Product price is required'],
+    required: [true, 'Retail price is required'],
+    min: [0, 'Price cannot be negative'],
+  },
+  wholesalePrice: {
+    type: Number,
+    required: [true, 'Wholesale price is required'],
     min: [0, 'Price cannot be negative'],
   },
   stock: {

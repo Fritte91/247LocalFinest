@@ -7,14 +7,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Leaf, Shield, MapPin, User, Calendar, Phone, Mail, Lock } from "lucide-react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Leaf, Shield, MapPin, User, Calendar, Phone, Mail, Lock, ShoppingBag, Store } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/components/ui/use-toast"
+
+interface FormData {
+  name: string
+  email: string
+  phone: string
+  dateOfBirth: string
+  address: string
+  city: string
+  state: string
+  zipCode: string
+  password: string
+  confirmPassword: string
+  buyerType: string
+  agreeTerms: boolean
+  ageVerified: boolean
+}
+
+interface FormErrors {
+  [key: string]: string | null
+}
 
 export default function SignupPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     phone: "",
@@ -25,20 +46,21 @@ export default function SignupPage() {
     zipCode: "",
     password: "",
     confirmPassword: "",
+    buyerType: "retail",
     agreeTerms: false,
     ageVerified: false,
   })
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: null }))
     }
   }
 
-  const validateAge = (dateOfBirth) => {
+  const validateAge = (dateOfBirth: string): number => {
     const today = new Date()
     const birthDate = new Date(dateOfBirth)
     const age = today.getFullYear() - birthDate.getFullYear()
@@ -50,9 +72,9 @@ export default function SignupPage() {
     return age
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const newErrors = {}
+    const newErrors: FormErrors = {}
 
     // Validation
     if (!formData.name) newErrors.name = "Full name is required"
@@ -65,6 +87,7 @@ export default function SignupPage() {
     if (!formData.zipCode) newErrors.zipCode = "Zip code is required"
     if (!formData.password) newErrors.password = "Password is required"
     if (!formData.confirmPassword) newErrors.confirmPassword = "Confirm password is required"
+    if (!formData.buyerType) newErrors.buyerType = "Buyer type is required"
     if (!formData.agreeTerms) newErrors.agreeTerms = "You must agree to the terms"
     if (!formData.ageVerified) newErrors.ageVerified = "Age verification is required"
 
@@ -103,6 +126,7 @@ export default function SignupPage() {
           city: formData.city,
           state: formData.state,
           zipCode: formData.zipCode,
+          buyerType: formData.buyerType,
         }),
       })
 
@@ -121,7 +145,7 @@ export default function SignupPage() {
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Failed to create account',
         variant: "destructive",
       })
     } finally {
@@ -259,6 +283,40 @@ export default function SignupPage() {
                       </div>
                       {errors.dateOfBirth && <p className="text-red-400 text-sm mt-2">{errors.dateOfBirth}</p>}
                     </div>
+                  </div>
+
+                  {/* Buyer Type Selection */}
+                  <div>
+                    <Label className="text-sage-300 font-medium">
+                      Account Type *
+                    </Label>
+                    <RadioGroup
+                      value={formData.buyerType}
+                      onValueChange={(value) => handleInputChange("buyerType", value)}
+                      className="mt-3 space-y-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="retail" id="retail" className="text-forest-500" />
+                        <Label htmlFor="retail" className="flex items-center gap-2 text-sage-300 cursor-pointer">
+                          <ShoppingBag className="h-5 w-5 text-forest-400" />
+                          <div>
+                            <div className="font-medium">Retail Buyer</div>
+                            <div className="text-sm text-sage-400">Individual consumer purchases</div>
+                          </div>
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="wholesale" id="wholesale" className="text-forest-500" />
+                        <Label htmlFor="wholesale" className="flex items-center gap-2 text-sage-300 cursor-pointer">
+                          <Store className="h-5 w-5 text-forest-400" />
+                          <div>
+                            <div className="font-medium">Wholesale Buyer</div>
+                            <div className="text-sm text-sage-400">Business/reseller purchases</div>
+                          </div>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                    {errors.buyerType && <p className="text-red-400 text-sm mt-2">{errors.buyerType}</p>}
                   </div>
 
                   <div>

@@ -55,6 +55,7 @@ export default function ProfilePage() {
     email: "",
     phone: "",
     dateOfBirth: "",
+    buyerType: "retail",
     address: {
       street: "",
       city: "",
@@ -82,6 +83,7 @@ export default function ProfilePage() {
           email: data.email || "",
           phone: data.phone || "",
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
+          buyerType: data.buyerType || "retail",
           address: {
             street: data.address?.street || "",
             city: data.address?.city || "",
@@ -98,6 +100,7 @@ export default function ProfilePage() {
           email: data.email || "",
           phone: data.phone || "",
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : "",
+          buyerType: data.buyerType || "retail",
           address: {
             street: data.address?.street || "",
             city: data.address?.city || "",
@@ -438,6 +441,19 @@ export default function ProfilePage() {
                         {profileData.dateOfBirth}
                       </div>
                     )}
+                  </div>
+
+                  <div>
+                    <Label className="text-sage-300 font-medium">Account Type</Label>
+                    <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white flex items-center gap-3">
+                      <User className="h-5 w-5 text-sage-400" />
+                      <div className="flex items-center gap-2">
+                        <span className="capitalize">{profileData.buyerType}</span>
+                        <Badge variant="outline" className="border-forest-500 text-forest-400 text-xs">
+                          {profileData.buyerType === 'retail' ? 'Individual Buyer' : 'Business Buyer'}
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

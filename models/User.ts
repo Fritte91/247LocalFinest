@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  buyerType: {
+    type: String,
+    enum: ['retail', 'wholesale'],
+    required: [true, 'Buyer type is required'],
+    default: 'retail',
+  },
   address: {
     street: String,
     city: String,

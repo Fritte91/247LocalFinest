@@ -34,6 +34,8 @@ interface Product {
   category: "flowers" | "glassware" | "artwork";
   subcategory?: string;
   price: number;
+  retailPrice: number;
+  wholesalePrice: number;
   thc?: number;
   cbd?: number;
   strain?: string;
@@ -132,7 +134,9 @@ export default function MembersShop() {
               name: item.name,
               category: item.category,
               subcategory: item.subcategory,
-              price: item.price,
+              price: item.price || item.retailPrice || 0,
+              retailPrice: item.retailPrice,
+              wholesalePrice: item.wholesalePrice,
               thc: item.thc ? parseFloat(item.thc) : undefined,
               cbd: item.cbd ? parseFloat(item.cbd) : undefined,
               strain: item.strain,
@@ -210,7 +214,16 @@ export default function MembersShop() {
       removeFromWishlist(product.id)
       toast.info(`${product.name} removed from wishlist.`)
     } else {
-      addToWishlist(product.id)
+      const wishlistItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images?.[0] || "",
+        category: product.category,
+        grower: product.grower?.name,
+        artist: product.artist,
+      }
+      addToWishlist(wishlistItem)
       toast.success(`${product.name} added to wishlist!`)
     }
   }
@@ -253,7 +266,7 @@ export default function MembersShop() {
           </div>
         </div>
         <div className="mt-4 flex justify-between items-center">
-          <p className="text-2xl font-bold text-white">฿{product.price.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-white">฿{(product.price || 0).toFixed(2)}</p>
           <Button 
             className="premium-gradient" 
             onClick={(e) => {
@@ -294,7 +307,7 @@ export default function MembersShop() {
             <p className="mt-2 text-sm text-sage-400 max-w-md">{product.description}</p>
           </div>
           <div className="flex flex-col items-end justify-between">
-            <p className="text-2xl font-bold text-white">฿{product.price.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-white">฿{(product.price || 0).toFixed(2)}</p>
             <div className="flex gap-2 mt-4">
               <Button 
                 className="h-9 w-9 p-0 rounded-full bg-black/50 text-white hover:bg-forest-500/80 backdrop-blur-sm"
@@ -398,7 +411,7 @@ export default function MembersShop() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-white">฿{product.price.toFixed(2)}</div>
+                    <div className="text-3xl font-bold text-white">฿{(product.price || 0).toFixed(2)}</div>
                     <div className={`text-sm ${product.inStock > 0 ? 'text-forest-400' : 'text-red-400'}`}>
                       {product.inStock > 0 ? `${product.inStock} in stock` : "Out of stock"}
                     </div>

@@ -46,7 +46,8 @@ interface Product {
   name: string;
   category: string;
   subcategory?: string;
-  price: number;
+  retailPrice: number;
+  wholesalePrice: number;
   stock: number;
   status: 'active' | 'low_stock' | 'out_of_stock';
   thc?: string;
@@ -66,7 +67,8 @@ interface NewProduct {
   name: string;
   category: string;
   subcategory: string;
-  price: string;
+  retailPrice: string;
+  wholesalePrice: string;
   stock: string;
   thc: string;
   cbd: string;
@@ -99,7 +101,8 @@ export default function AdminDashboard() {
     name: "",
     category: "",
     subcategory: "",
-    price: "",
+    retailPrice: "",
+    wholesalePrice: "",
     stock: "",
     thc: "",
     cbd: "",
@@ -327,10 +330,10 @@ export default function AdminDashboard() {
 
   const handleAddProduct = async () => {
     // Only validate required fields from the database schema
-    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock) {
+    if (!newProduct.name || !newProduct.category || !newProduct.retailPrice || !newProduct.wholesalePrice || !newProduct.stock) {
       toast({
         title: "Error",
-        description: "Name, category, price, and stock are required",
+        description: "Name, category, retail price, wholesale price, and stock are required",
         variant: "destructive",
       })
       return
@@ -348,7 +351,8 @@ export default function AdminDashboard() {
         name: newProduct.name,
         category: newProduct.category,
         subcategory: newProduct.subcategory || undefined,
-        price: Number.parseFloat(newProduct.price),
+        retailPrice: Number.parseFloat(newProduct.retailPrice),
+        wholesalePrice: Number.parseFloat(newProduct.wholesalePrice),
         stock: Number.parseInt(newProduct.stock) || 0,
         thc: newProduct.thc || undefined,
         cbd: newProduct.cbd || undefined,
@@ -376,19 +380,20 @@ export default function AdminDashboard() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to create product')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create product')
       }
-      
+
       const createdProduct = await response.json()
-      setProducts([...products, createdProduct])
+      setProducts([createdProduct, ...products])
       
       // Reset form
       setNewProduct({
         name: "",
         category: "",
         subcategory: "",
-        price: "",
+        retailPrice: "",
+        wholesalePrice: "",
         stock: "",
         thc: "",
         cbd: "",
@@ -404,15 +409,16 @@ export default function AdminDashboard() {
       })
       setSelectedImages([])
       setIsAddProductOpen(false)
-
+      
       toast({
         title: "Success",
-        description: "Product created successfully",
+        description: "Product created successfully!",
       })
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error creating product:', error)
       toast({
         title: "Error",
-        description: error.message || "Failed to create product",
+        description: error instanceof Error ? error.message : "Failed to create product",
         variant: "destructive",
       })
     } finally {
@@ -668,7 +674,8 @@ export default function AdminDashboard() {
                         <TableHead className="text-sage-300">Image</TableHead>
                         <TableHead className="text-sage-300">Product Name</TableHead>
                         <TableHead className="text-sage-300">Category</TableHead>
-                        <TableHead className="text-sage-300">Price</TableHead>
+                        <TableHead className="text-sage-300">Retail Price</TableHead>
+                        <TableHead className="text-sage-300">Wholesale Price</TableHead>
                         <TableHead className="text-sage-300">Stock</TableHead>
                         <TableHead className="text-sage-300">Status</TableHead>
                         <TableHead className="text-sage-300">Creator</TableHead>
@@ -703,7 +710,8 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-white">${product.price}</TableCell>
+                          <TableCell className="text-white">${(product.retailPrice || 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-white">${(product.wholesalePrice || 0).toFixed(2)}</TableCell>
                           <TableCell>
                             {editingProduct === product._id ? (
                               <Input
@@ -858,15 +866,29 @@ export default function AdminDashboard() {
 
                 <div className="grid md:grid-cols-3 gap-6">
                   <div>
-                    <Label htmlFor="price" className="text-sage-300 font-medium">
-                      Price ($) *
+                    <Label htmlFor="retailPrice" className="text-sage-300 font-medium">
+                      Retail Price ($) *
                     </Label>
                     <Input
-                      id="price"
+                      id="retailPrice"
                       type="number"
                       step="0.01"
-                      value={newProduct.price}
-                      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                      value={newProduct.retailPrice}
+                      onChange={(e) => setNewProduct({ ...newProduct, retailPrice: e.target.value })}
+                      placeholder="0.00"
+                      className="mt-2 bg-black border-sage-700 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="wholesalePrice" className="text-sage-300 font-medium">
+                      Wholesale Price ($) *
+                    </Label>
+                    <Input
+                      id="wholesalePrice"
+                      type="number"
+                      step="0.01"
+                      value={newProduct.wholesalePrice}
+                      onChange={(e) => setNewProduct({ ...newProduct, wholesalePrice: e.target.value })}
                       placeholder="0.00"
                       className="mt-2 bg-black border-sage-700 text-white"
                     />
@@ -1114,7 +1136,7 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                           <TableCell className="text-white font-semibold">
-                            ${order.totalAmount.toFixed(2)}
+                            ${(order.totalAmount || 0).toFixed(2)}
                           </TableCell>
                           <TableCell>
                             {getOrderStatusBadge(order.status)}
@@ -1183,7 +1205,7 @@ export default function AdminDashboard() {
                       <span className={`font-semibold text-xl ${
                         stats.growthPercentage >= 0 ? 'text-gold-400' : 'text-red-400'
                       }`}>
-                        {stats.growthPercentage >= 0 ? '+' : ''}{stats.growthPercentage.toFixed(1)}%
+                        {stats.growthPercentage >= 0 ? '+' : ''}{(stats.growthPercentage || 0).toFixed(1)}%
                       </span>
                     </div>
                     <div className="flex justify-between items-center p-4 dark-glass rounded-lg">
@@ -1451,12 +1473,12 @@ export default function AdminDashboard() {
                               {item.product?.name || 'Product not found'}
                             </p>
                             <p className="text-sage-300 text-sm">
-                              Qty: {item.quantity} × ${item.price.toFixed(2)} each
+                              Qty: {item.quantity} × ${(item.price || 0).toFixed(2)} each
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="text-white font-semibold">
-                              ${(item.price * item.quantity).toFixed(2)}
+                              ${((item.price || 0) * item.quantity).toFixed(2)}
                             </p>
                           </div>
                         </div>
@@ -1475,7 +1497,7 @@ export default function AdminDashboard() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sage-300">Subtotal:</span>
-                        <span className="text-white">${selectedOrder.totalAmount.toFixed(2)}</span>
+                        <span className="text-white">${(selectedOrder.totalAmount || 0).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sage-300">Payment Status:</span>

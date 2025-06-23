@@ -15,12 +15,21 @@ export async function POST(request: Request) {
       city,
       state,
       zipCode,
+      buyerType = 'retail',
       role = 'user' 
     } = await request.json();
 
-    if (!name || !email || !password || !phone || !dateOfBirth || !address || !city || !state || !zipCode) {
+    if (!name || !email || !password || !phone || !dateOfBirth || !address || !city || !state || !zipCode || !buyerType) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Validate buyerType
+    if (!['retail', 'wholesale'].includes(buyerType)) {
+      return NextResponse.json(
+        { error: 'Invalid buyer type. Must be either "retail" or "wholesale"' },
         { status: 400 }
       );
     }
@@ -51,8 +60,9 @@ export async function POST(request: Request) {
       email,
       password: hashedPassword,
       role,
+      buyerType,
       phone,
-      phoneNumber: phone, // For backward compatibility
+      phoneNumber: phone, // Map phone to phoneNumber for backward compatibility
       dateOfBirth: new Date(dateOfBirth),
       address: {
         street: address,
