@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
@@ -34,7 +34,16 @@ import {
 import { events, type Event } from "./data/events"
 import { awards, type Award } from "./data/awards"
 import { growersData } from "@/app/data/growers"
-import { articleCategories, latestArticles, popularTopics, featuredArticle } from "./data/education"
+import { 
+  articleCategories, 
+  articles, 
+  popularTopics, 
+  featuredContent,
+  getTrendingArticles,
+  getLatestArticles,
+  type Article,
+  type ArticleCategory 
+} from "./data/education"
 
 // Helper to format dates consistently for SSR/CSR
 const formatDate = (dateString: string) => {
@@ -57,6 +66,14 @@ const getIconComponent = (iconName: string) => {
   return icons[iconName] || Sprout;
 };
 
+const iconMap: Record<string, any> = {
+  Sprout: Sprout,
+  Beaker: Beaker,
+  Heart: Heart,
+  Wrench: Wrench,
+  BookOpen: BookOpen,
+};
+
 export default function CommunityPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [selectedAward, setSelectedAward] = useState<Award | null>(null)
@@ -64,6 +81,22 @@ export default function CommunityPage() {
   const { cart } = useApp()
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  const categoryParam = searchParams.get("category")
+  const selectedCategory = useMemo(() => {
+    return (
+      articleCategories.find((cat) => cat.id === categoryParam) || articleCategories[0]
+    )
+  }, [categoryParam])
+  const filteredArticles = useMemo(() => {
+    return articles.filter((a) => a.categorySlug === selectedCategory.id)
+  }, [selectedCategory])
+  const handleCategoryClick = (cat: ArticleCategory) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', 'education')
+    params.set('category', cat.id)
+    router.push(`/members/community?${params.toString()}`, { scroll: false })
+  }
 
   // Handle tab changes and update URL
   const handleTabChange = (value: string) => {
@@ -616,160 +649,149 @@ export default function CommunityPage() {
           </TabsContent>
 
           {/* Education Tab */}
-          <TabsContent value="education" className="space-y-6 md:space-y-8">
-            <div className="text-center mb-6 md:mb-8">
-              <h2 className="text-xl md:text-3xl font-display font-bold text-white mb-3 md:mb-4">Cannabis Knowledge Hub</h2>
-              <p className="text-sm md:text-lg text-sage-300 px-4">
-                Explore our comprehensive collection of cannabis articles and guides
-              </p>
-            </div>
-
-            {/* Featured Article Hero */}
-            <Card className="bg-gradient-to-r from-sage-950 to-forest-950 border-sage-800 overflow-hidden hover-lift cursor-pointer">
-              <div className="grid md:grid-cols-2 gap-0">
-                <div className="relative h-48 md:h-64 lg:h-auto">
-                  <Image
-                    src={featuredArticle.image}
-                    alt="Featured Article"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-                  <Badge className="absolute top-3 md:top-4 left-3 md:left-4 premium-gradient text-white text-xs">Featured Article</Badge>
-                  <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4">
-                    <Badge variant="outline" className="border-forest-500 text-forest-400 mb-2 text-xs">
-                      {featuredArticle.category}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="p-4 md:p-8 flex flex-col justify-center">
-                  <h3 className="text-lg md:text-2xl font-display font-bold text-white mb-3 md:mb-4">
-                    {featuredArticle.title}
-                  </h3>
-                  <p className="text-sage-300 mb-4 md:mb-6 leading-relaxed text-sm md:text-base">
-                    {featuredArticle.description}
+          <TabsContent value="education" className="space-y-8 md:space-y-12">
+            {/* Hero/Intro Section */}
+            <div className="relative w-full py-12 md:py-16 mb-8 md:mb-12 bg-gradient-to-r from-forest-900 via-sage-950 to-black overflow-hidden rounded-2xl shadow-xl">
+              <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1 text-center md:text-left">
+                  <h1 className="text-3xl md:text-5xl font-display font-bold text-white mb-4 drop-shadow-lg">
+                    Explore Cannabis Knowledge
+                  </h1>
+                  <p className="text-lg md:text-2xl text-sage-300 max-w-2xl mb-4 md:mb-6">
+                    Discover premium articles, guides, and tips from expert growers, scientists, and wellness professionals. Browse by category or dive into trending topics.
                   </p>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-4 mb-4 md:mb-6">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-sage-400" />
-                      <span className="text-sage-300 text-xs md:text-sm">{featuredArticle.author}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-sage-400" />
-                      <span className="text-sage-300 text-xs md:text-sm">{featuredArticle.readTime}</span>
-                    </div>
-                    <Badge variant="outline" className="border-gold-500 text-gold-400 text-xs w-fit">
-                      {featuredArticle.level}
-                    </Badge>
-                  </div>
-                  <Link href="/members/community/articles">
-                    <Button className="premium-gradient text-white w-fit text-sm">Read Full Article</Button>
-                  </Link>
-                </div>
-              </div>
-            </Card>
-
-            {/* Article Categories */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {articleCategories.map((category, index) => {
-                const IconComponent = getIconComponent(category.icon);
-                return (
-                  <Card key={index} className="bg-sage-950 border-sage-800 hover-lift group cursor-pointer">
-                    <CardHeader className="text-center relative overflow-hidden p-4 md:p-6">
-                      <div className={`w-16 h-16 md:w-20 md:h-20 ${category.gradient} rounded-full mx-auto mb-3 md:mb-4 flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                        <IconComponent className="h-8 w-8 md:h-10 md:w-10 text-white" />
-                      </div>
-                      <CardTitle className="text-white font-display text-sm md:text-base">{category.title}</CardTitle>
-                      <CardDescription className="text-sage-300 text-xs md:text-sm">{category.description}</CardDescription>
-                      <div className="absolute -top-10 -right-10 w-20 h-20 bg-forest-500/10 rounded-full group-hover:scale-150 transition-transform duration-500" />
-                    </CardHeader>
-                    <CardContent className="space-y-3 md:space-y-4 p-4 md:p-6">
-                      <div className="space-y-2 md:space-y-3">
-                        <div className="text-center">
-                          <div className="text-xl md:text-2xl font-bold text-forest-400">{category.articleCount}</div>
-                          <div className="text-sage-400 text-xs md:text-sm">Articles</div>
-                        </div>
-                      </div>
-                      <div className="space-y-1 md:space-y-2">
-                        {category.topics.slice(0, 3).map((topic, topicIndex) => (
-                          <div key={topicIndex} className="text-sage-300 text-xs md:text-sm">• {topic}</div>
-                        ))}
-                      </div>
-                      <Link href="/members/community/articles">
-                        <Button className={`w-full ${category.gradient} text-white text-sm`}>Explore Articles</Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-
-            {/* Latest Articles Grid */}
-            <div>
-              <h3 className="text-xl md:text-2xl font-display font-bold text-white mb-4 md:mb-6">Latest Articles</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {latestArticles.map((article, index) => (
-                  <Card key={index} className="bg-sage-950 border-sage-800 hover-lift cursor-pointer group">
-                    <div className="relative h-40 md:h-48">
-                      <Image
-                        src={article.image}
-                        alt={article.title}
-                        fill
-                        className="object-cover rounded-t-lg transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-t-lg" />
-                      <Badge className={`absolute top-2 md:top-3 left-2 md:left-3 ${
-                        article.category === 'Growing' ? 'premium-gradient text-white' :
-                        article.category === 'Terpenes' ? 'bg-purple-600 text-white' :
-                        article.category === 'Health' ? 'bg-emerald-600 text-white' :
-                        'bg-amber-600 text-white'
-                      } text-xs`}>
-                        {article.category}
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                    {articleCategories.map((cat) => (
+                      <Badge
+                        key={cat.id}
+                        className={`cursor-pointer px-4 py-2 text-base font-semibold ${cat.id === selectedCategory.id ? "premium-gradient text-white" : "bg-sage-900 text-sage-300 hover:bg-sage-800"}`}
+                        onClick={() => handleCategoryClick(cat)}
+                      >
+                        {cat.title}
                       </Badge>
-                      <div className="absolute bottom-2 md:bottom-3 left-2 md:left-3 right-2 md:right-3">
-                        <h4 className="text-white font-semibold text-xs md:text-sm">{article.title}</h4>
-                      </div>
-                    </div>
-                    <CardContent className="p-3 md:p-4">
-                      <p className="text-sage-300 text-xs md:text-sm mb-2 md:mb-3 line-clamp-2">
-                        {article.description}
-                      </p>
-                      <div className="flex items-center justify-between text-xs text-sage-400">
-                        <span className="truncate">{article.author}</span>
-                        <span>{article.readTime}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    ))}
+                  </div>
+                </div>
+                <div className="hidden md:block flex-1 relative h-56 w-full max-w-md">
+                  <Image
+                    src="/images/indoor.jpg"
+                    alt="Cannabis Knowledge"
+                    fill
+                    className="object-cover rounded-2xl shadow-2xl border-4 border-forest-700/40"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-2xl" />
+                </div>
               </div>
             </div>
 
-            {/* Popular Topics */}
-            <Card className="bg-gradient-to-r from-sage-950 to-black border-sage-800">
-              <CardHeader className="text-center p-4 md:p-6">
-                <CardTitle className="text-white font-display text-xl md:text-2xl">Popular Topics</CardTitle>
-                <CardDescription className="text-sage-300 text-sm">Most read articles this month</CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 md:p-6">
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                  {popularTopics.map((topic, index) => {
-                    const IconComponent = getIconComponent(topic.icon);
-                    return (
-                      <div key={index} className="text-center group cursor-pointer">
-                        <div className={`w-12 h-12 md:w-16 md:h-16 ${topic.gradient} rounded-full mx-auto mb-3 md:mb-4 flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                          <IconComponent className="h-6 w-6 md:h-8 md:w-8 text-white" />
-                        </div>
-                        <h4 className="text-white font-semibold mb-1 md:mb-2 text-sm md:text-base">{topic.title}</h4>
-                        <p className="text-sage-300 text-xs md:text-sm mb-3 md:mb-4">{topic.description}</p>
-                        <Badge variant="outline" className="border-sage-600 text-sage-300 text-xs">
-                          {topic.articleCount} articles
-                        </Badge>
-                      </div>
-                    );
-                  })}
+            <div className="container mx-auto px-4 flex flex-col md:flex-row gap-8">
+              {/* Sidebar */}
+              <aside className="w-full md:w-72 flex-shrink-0 mb-8 md:mb-0">
+                <div className="sticky top-24">
+                  <div className="rounded-2xl bg-sage-950/80 border border-sage-800 shadow-lg p-6 backdrop-blur-md">
+                    <h3 className="text-lg font-bold text-white mb-6 tracking-wide">Categories</h3>
+                    <div className="flex flex-col gap-2">
+                      {articleCategories.map((cat) => {
+                        const Icon = iconMap[cat.icon] || BookOpen
+                        return (
+                          <button
+                            key={cat.id}
+                            onClick={() => handleCategoryClick(cat)}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-base border-2 ${
+                              cat.id === selectedCategory.id
+                                ? "border-forest-500 bg-gradient-to-r from-forest-900 via-sage-900 to-black text-white shadow-lg"
+                                : "border-transparent bg-sage-900/60 text-sage-300 hover:bg-sage-800/80 hover:text-white"
+                            }`}
+                          >
+                            <Icon className="h-5 w-5" />
+                            <span className="flex-1">{cat.title}</span>
+                            <span className="text-xs font-semibold px-2 py-1 rounded bg-sage-800 text-sage-300 ml-2">
+                              {articles.filter((a) => a.categorySlug === cat.id).length}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </aside>
+
+              {/* Main Content */}
+              <main className="flex-1">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
+                    {selectedCategory.title}
+                  </h2>
+                </div>
+
+                {/* Article Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {filteredArticles.map((article, idx) => (
+                    <Link key={article.id} href={`/members/community/articles/${article.slug}`} className="group">
+                      <Card className="relative bg-sage-950/90 border border-sage-800 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 group-hover:scale-[1.025] group-hover:border-forest-500 group-hover:shadow-forest-900/30">
+                        {/* Article Image */}
+                        <div className="relative h-44 w-full overflow-hidden">
+                          <Image
+                            src={article.image}
+                            alt={article.title}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                          {/* Badges */}
+                          <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                            <Badge className={`text-xs font-semibold px-3 py-1 ${
+                              article.categorySlug === 'growing' ? 'premium-gradient text-white' :
+                              article.categorySlug === 'terpenes' ? 'bg-purple-600 text-white' :
+                              article.categorySlug === 'health' ? 'bg-emerald-600 text-white' :
+                              'bg-amber-600 text-white'
+                            }`}>
+                              {article.category}
+                            </Badge>
+                            <Badge variant="outline" className="border-gold-500 text-gold-400 text-xs w-fit">
+                              {article.difficulty}
+                            </Badge>
+                            {article.trending && (
+                              <Badge className="bg-gradient-to-r from-pink-500 to-yellow-400 text-white text-xs w-fit animate-pulse">Trending</Badge>
+                            )}
+                            {article.featured && (
+                              <Badge className="gold-gradient text-white text-xs w-fit">Featured</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <CardContent className="p-6 flex flex-col h-full">
+                          <h3 className="text-lg md:text-xl font-bold text-white mb-2 line-clamp-2">
+                            {article.title}
+                          </h3>
+                          <p className="text-sage-300 text-sm mb-4 line-clamp-2">
+                            {article.description}
+                          </p>
+                          <div className="flex items-center gap-3 mt-auto">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-sage-400" />
+                              <span className="text-sage-300 text-xs font-medium truncate">{article.author}</span>
+                            </div>
+                            <span className="text-sage-500 text-xs">•</span>
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-sage-400" />
+                              <span className="text-sage-300 text-xs font-medium">{article.readTime}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* No articles fallback */}
+                {filteredArticles.length === 0 && (
+                  <div className="text-center text-sage-400 py-16 text-lg">
+                    No articles found in this category yet.
+                  </div>
+                )}
+              </main>
+            </div>
           </TabsContent>
 
           {/* Growers Tab */}
