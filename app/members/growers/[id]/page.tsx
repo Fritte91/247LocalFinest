@@ -7,98 +7,15 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Leaf, Award, MapPin, Calendar, Users, ArrowLeft, Beaker, Sprout } from "lucide-react"
+import { growersData } from "@/app/data/growers"
+import { notFound, useParams } from "next/navigation"
 
-export default function GrowerProfilePage({ params }) {
-  // Mock data - in real app this would come from API based on params.id
-  const grower = {
-    id: 1,
-    name: "Marcus Chen",
-    specialty: "Hydroponic Systems",
-    experience: "12 years",
-    location: "Northern California",
-    bio: "Marcus is a pioneering cannabis cultivator who has dedicated over a decade to perfecting hydroponic growing techniques. His passion for innovation and sustainable practices has earned him recognition throughout the cannabis community.",
-    image: "/images/beam.jpg",
-    coverImage: "/images/weed2.jpg",
-    followers: 2400,
-    totalHarvests: 156,
-    avgThc: 23.5,
-    awards: [
-      {
-        title: "Cannabis Cup Winner 2023",
-        category: "Best Indoor Flower",
-        year: "2023",
-        strain: "Purple Haze Premium",
-      },
-      {
-        title: "Master Grower Award",
-        category: "Innovation in Hydroponics",
-        year: "2022",
-        strain: "OG Kush Indoor",
-      },
-      {
-        title: "Sustainable Cultivation",
-        category: "Environmental Excellence",
-        year: "2021",
-        strain: "Green Dream",
-      },
-    ],
-    strains: [
-      {
-        name: "Purple Haze Premium",
-        type: "Sativa Dominant",
-        thc: 22,
-        cbd: 1,
-        yield: "High",
-        difficulty: "Advanced",
-        flowerTime: "9-10 weeks",
-        description: "Marcus's signature strain with exceptional terpene profiles",
-        image: "/placeholder.svg?height=200&width=200",
-      },
-      {
-        name: "OG Kush Indoor",
-        type: "Indica Dominant",
-        thc: 24,
-        cbd: 0.5,
-        yield: "Medium-High",
-        difficulty: "Intermediate",
-        flowerTime: "8-9 weeks",
-        description: "Classic OG genetics perfected through hydroponic cultivation",
-        image: "/placeholder.svg?height=200&width=200",
-      },
-      {
-        name: "Hybrid Balance",
-        type: "Balanced Hybrid",
-        thc: 20,
-        cbd: 3,
-        yield: "Medium",
-        difficulty: "Beginner",
-        flowerTime: "8 weeks",
-        description: "Perfect introduction strain for new growers",
-        image: "/placeholder.svg?height=200&width=200",
-      },
-    ],
-    techniques: [
-      {
-        name: "Deep Water Culture",
-        description: "Advanced hydroponic system for maximum nutrient uptake",
-        expertise: 95,
-      },
-      {
-        name: "LED Optimization",
-        description: "Precision lighting for enhanced cannabinoid production",
-        expertise: 90,
-      },
-      {
-        name: "Climate Control",
-        description: "Environmental management for consistent quality",
-        expertise: 88,
-      },
-      {
-        name: "Organic Nutrients",
-        description: "Sustainable feeding programs for premium results",
-        expertise: 85,
-      },
-    ],
+export default function GrowerProfilePage() {
+  const { id } = useParams<{ id: string }>()
+  const grower = growersData.find((g) => g.id === parseInt(id, 10))
+
+  if (!grower) {
+    notFound()
   }
 
   return (
@@ -109,12 +26,12 @@ export default function GrowerProfilePage({ params }) {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
               <Leaf className="h-8 w-8 text-forest-500" />
-              <span className="text-2xl font-display font-bold text-white">GreenCraft</span>
+              <span className="text-2xl font-display font-bold text-white">247LocalFinest</span>
             </Link>
-            <Link href="/members/community">
+            <Link href="/members/growers">
               <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Community
+                Back to Growers
               </Button>
             </Link>
           </div>
@@ -186,7 +103,7 @@ export default function GrowerProfilePage({ params }) {
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  <span>Growing since 2012</span>
+                  <span>Growing since {grower.growingSince}</span>
                 </div>
               </div>
             </div>

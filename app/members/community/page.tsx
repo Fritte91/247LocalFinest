@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { MobileNav } from "@/app/components/mobile-nav"
+import { useApp, type CartItem } from "@/app/hooks/use-app"
 import {
   Leaf,
   User,
@@ -27,10 +28,11 @@ import {
   Flame,
   Microscope,
   Wrench,
+  ShoppingCart,
 } from "lucide-react"
 import { events, type Event } from "./data/events"
 import { awards, type Award } from "./data/awards"
-import { growerProfiles, type GrowerProfile } from "./data/growers"
+import { growersData } from "@/app/data/growers"
 import { articleCategories, latestArticles, popularTopics, featuredArticle } from "./data/education"
 
 // Helper to format dates consistently for SSR/CSR
@@ -58,6 +60,7 @@ export default function CommunityPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [selectedAward, setSelectedAward] = useState<Award | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { cart } = useApp()
 
   const EventDetailDialog = ({ event, onClose }: { event: Event | null; onClose: () => void }) => {
     if (!event) return null
@@ -264,13 +267,13 @@ export default function CommunityPage() {
                       <div className="text-lg md:text-2xl font-bold text-forest-400">
                         {award.competitionStats.totalEntries || award.competitionStats.totalVotes}
                       </div>
-                      <div className="text-sage-400 text-xs md:text-sm">
-                        {award.competitionStats.totalVotes ? "Total Votes" : "Total Entries"}
+                      <div className="text-xs text-sage-400">
+                        {award.competitionStats.totalVotes ? "Votes" : "Entries"}
                       </div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg md:text-2xl font-bold text-gold-400">{award.competitionStats.categories}</div>
-                      <div className="text-sage-400 text-xs md:text-sm">Categories</div>
+                      <div className="text-xs text-sage-400">Categories</div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg md:text-2xl font-bold text-forest-400">
@@ -346,16 +349,28 @@ export default function CommunityPage() {
               <Link href="/members/growers" className="text-sage-300 hover:text-white font-medium transition-colors">
                 Growers
               </Link>
-              <Button variant="outline" className="border-sage-600 text-sage-300">
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </Button>
+              <Link href="/members/cart">
+                <Button variant="outline" className="relative bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 transition-all duration-300">
+                  <ShoppingCart className="h-4 w-4" />
+                  {cart.length > 0 && (
+                    <Badge className="absolute -top-2 -right-2 gold-gradient text-white text-xs animate-pulse">
+                      {cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0)}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+              <Link href="/members/profile">
+                <Button variant="outline" className="bg-sage-900 border-forest-500 text-forest-400 hover:bg-forest-900/50 hover:text-forest-300 transition-all duration-300">
+                  <User className="h-4 w-4 mr-2" />
+                  Profile
+                </Button>
+              </Link>
             </nav>
 
             <MobileNav 
               mobileMenuOpen={mobileMenuOpen}
               setMobileMenuOpen={setMobileMenuOpen}
-              cartItemCount={0}
+              cartItemCount={cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0)}
               currentPath="/members/community"
             />
           </div>
@@ -733,263 +748,264 @@ export default function CommunityPage() {
           </TabsContent>
 
           {/* Growers Tab */}
-          <TabsContent value="growers" className="space-y-6 md:space-y-8">
-            <div className="text-center mb-6 md:mb-8">
-              <h2 className="text-xl md:text-3xl font-display font-bold text-white mb-3 md:mb-4">Master Growers Collective</h2>
-              <p className="text-sm md:text-lg text-sage-300 px-4">
-                Meet the legendary cultivators behind our award-winning strains
-              </p>
+          <TabsContent value="growers" className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-display font-bold text-white mb-2">Master Growers Collective</h2>
+              <p className="text-lg text-sage-300">Meet the legendary cultivators behind our award-winning strains</p>
             </div>
 
-            {/* Featured Master Grower Hero */}
-            <Card className="bg-gradient-to-r from-sage-950 via-forest-950 to-sage-950 border-sage-800 overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-gold-500/5 to-forest-500/5" />
-              <div className="grid md:grid-cols-2 gap-0 relative z-10">
-                <div className="relative h-60 md:h-80 lg:h-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Master Grower of the Year Card */}
+              <div className="lg:col-span-2">
+                <Card className="bg-sage-950 border-sage-800/70 p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden">
                   <Image
-                    src="/placeholder.svg?height=500&width=600"
-                    alt={growerProfiles[0].name}
+                    src={growersData[0].coverImage || "/placeholder.svg"}
+                    alt="background"
                     fill
-                    className="object-cover"
+                    className="object-cover opacity-10"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
-                  <Badge className="absolute top-4 md:top-6 left-4 md:left-6 gold-gradient text-white text-xs md:text-sm px-3 md:px-4 py-1 md:py-2">
-                    Master Grower of the Year
-                  </Badge>
-                  <div className="absolute bottom-4 md:bottom-6 left-4 md:left-6">
-                    <div className="flex items-center gap-2 md:gap-3">
-                      <div className="w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-white text-xs md:text-sm font-medium">Currently Growing</span>
+                  <div className="md:w-1/3 relative flex-shrink-0">
+                    <Image
+                      src={growersData[0].image}
+                      alt={growersData[0].name}
+                      width={300}
+                      height={400}
+                      className="rounded-lg object-cover w-full h-full min-h-[300px]"
+                    />
+                    <Badge className="gold-gradient text-white absolute top-3 left-3">Master Grower of the Year</Badge>
+                  </div>
+                  <div className="md:w-2/3 flex flex-col relative">
+                    <div className="flex items-start gap-4 mb-2">
+                      <div className="bg-forest-500/10 p-3 rounded-lg border border-forest-500/30">
+                        <Crown className="h-6 w-6 text-forest-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-display text-white">{growersData[0].name}</h3>
+                        <p className="text-forest-400 font-semibold">{growersData[0].specialty}</p>
+                      </div>
+                    </div>
+                    <p className="text-sage-300 text-sm mb-4 flex-grow">{growersData[0].role}</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                      <div className="text-center">
+                        <div className="font-bold text-lg text-white">{growersData[0].totalAwards}</div>
+                        <div className="text-xs text-sage-400">Awards</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-lg text-white">{(growersData[0].followers / 1000).toFixed(1)}K</div>
+                        <div className="text-xs text-sage-400">Followers</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-lg text-white">{growersData[0].totalHarvests}</div>
+                        <div className="text-xs text-sage-400">Harvests</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-lg text-white">{growersData[0].avgThc}%</div>
+                        <div className="text-xs text-sage-400">Avg. THC</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-auto">
+                      <Link href={`/members/growers/${growersData[0].id}`} className="flex-1">
+                        <Button
+                          variant="outline"
+                          className="w-full bg-forest-500/10 border-forest-500/30 text-forest-300 hover:bg-forest-500/20"
+                        >
+                          View Portfolio
+                        </Button>
+                      </Link>
+                      <Button className="premium-gradient flex-1">
+                        <Users className="h-4 w-4 mr-2" /> Follow Grower
+                      </Button>
                     </div>
                   </div>
+                </Card>
+              </div>
+
+              {/* Other Growers */}
+              {growersData.slice(1).map((grower) => {
+                const themeClasses = {
+                  emerald: {
+                    bg: "bg-emerald-950/50",
+                    border: "border-emerald-500/30",
+                    badge: "bg-emerald-600",
+                    text: "text-emerald-400",
+                    button: "bg-gradient-to-r from-emerald-500 to-emerald-700",
+                    iconContainer: "bg-emerald-500/10 border-emerald-500/30",
+                    icon: <Leaf className="h-6 w-6 text-emerald-400" />,
+                    tagBorder: "border-emerald-500",
+                  },
+                  purple: {
+                    bg: "bg-purple-950/50",
+                    border: "border-purple-500/30",
+                    badge: "bg-purple-600",
+                    text: "text-purple-400",
+                    button: "bg-gradient-to-r from-purple-500 to-purple-700",
+                    iconContainer: "bg-purple-500/10 border-purple-500/30",
+                    icon: <Beaker className="h-6 w-6 text-purple-400" />,
+                    tagBorder: "border-purple-500",
+                  },
+                  forest: {
+                    bg: "bg-forest-950/50",
+                    border: "border-forest-500/30",
+                    badge: "bg-forest-600",
+                    text: "text-forest-400",
+                    button: "bg-gradient-to-r from-forest-500 to-forest-700",
+                    iconContainer: "bg-forest-500/10 border-forest-500/30",
+                    icon: <Crown className="h-6 w-6 text-forest-400" />,
+                    tagBorder: "border-forest-500",
+                  },
+                  sunset: {
+                    bg: "bg-orange-950/50",
+                    border: "border-orange-500/30",
+                    badge: "bg-orange-600",
+                    text: "text-orange-400",
+                    button: "bg-gradient-to-r from-orange-500 to-amber-700",
+                    iconContainer: "bg-orange-500/10 border-orange-500/30",
+                    icon: <Flame className="h-6 w-6 text-orange-400" />,
+                    tagBorder: "border-orange-500",
+                  },
+                  earth: {
+                    bg: "bg-yellow-950/50",
+                    border: "border-yellow-500/30",
+                    badge: "bg-yellow-700",
+                    text: "text-yellow-400",
+                    button: "bg-gradient-to-r from-yellow-600 to-orange-700",
+                    iconContainer: "bg-yellow-500/10 border-yellow-500/30",
+                    icon: <Sprout className="h-6 w-6 text-yellow-400" />,
+                    tagBorder: "border-yellow-500",
+                  },
+                  neon: {
+                    bg: "bg-pink-950/50",
+                    border: "border-pink-500/30",
+                    badge: "bg-pink-600",
+                    text: "text-pink-400",
+                    button: "bg-gradient-to-r from-pink-500 to-fuchsia-700",
+                    iconContainer: "bg-pink-500/10 border-pink-500/30",
+                    icon: <Star className="h-6 w-6 text-pink-400" />,
+                    tagBorder: "border-pink-500",
+                  },
+                  sage: {
+                    bg: "bg-lime-950/50",
+                    border: "border-lime-500/30",
+                    badge: "bg-lime-600",
+                    text: "text-lime-400",
+                    button: "bg-gradient-to-r from-lime-500 to-green-700",
+                    iconContainer: "bg-lime-500/10 border-lime-500/30",
+                    icon: <Heart className="h-6 w-6 text-lime-400" />,
+                    tagBorder: "border-lime-500",
+                  },
+                }
+                const currentTheme = themeClasses[grower.theme]
+
+                return (
+                  <Card key={grower.id} className={`p-6 flex flex-col ${currentTheme.bg} ${currentTheme.border} relative overflow-hidden`}>
+                    <Image
+                      src={grower.coverImage || "/placeholder.svg"}
+                      alt="background"
+                      fill
+                      className="object-cover opacity-10"
+                    />
+                    <div className="relative z-10 flex flex-col h-full">
+                      <div className="flex justify-between items-start mb-4">
+                        <Badge className={`${currentTheme.badge} text-white`}>{grower.roleBadge}</Badge>
+                        <div className={`p-3 rounded-lg ${currentTheme.iconContainer}`}>{currentTheme.icon}</div>
+                      </div>
+                      <h3 className="text-xl font-display text-white">{grower.name}</h3>
+                      <p className={`font-semibold ${currentTheme.text}`}>{grower.specialty}</p>
+                      <div className="flex items-center gap-4 text-sm text-sage-300 mt-1 mb-3">
+                        <span>{grower.experience}</span>
+                        <span>{grower.totalAwards} awards</span>
+                        <span>{(grower.followers / 1000).toFixed(1)}K followers</span>
+                      </div>
+                      <p className="text-sage-300 text-sm mb-4 flex-grow">{grower.role}</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {grower.techniques.map((tech) => (
+                          <Badge
+                            key={tech.name}
+                            variant="outline"
+                            className={`${currentTheme.tagBorder} ${currentTheme.text} bg-black/20`}
+                          >
+                            {tech.name}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className={`rounded-lg p-3 text-sm mb-4 bg-black/20 border ${currentTheme.border}`}>
+                        <p className={`font-semibold ${currentTheme.text} mb-1`}>
+                          <Trophy className="h-4 w-4 inline mr-2" />
+                          Recent Achievement
+                        </p>
+                        <p className="text-sage-300">{grower.awards[0]?.title}</p>
+                      </div>
+                      <Link href={`/members/growers/${grower.id}`} className="w-full mt-auto">
+                        <Button className={`w-full text-white ${currentTheme.button}`}>View Portfolio</Button>
+                      </Link>
+                    </div>
+                  </Card>
+                )
+              })}
+            </div>
+
+            {/* Our Growing Collective */}
+            <div className="bg-sage-950 border-sage-800/70 rounded-lg p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 items-center text-center lg:text-left">
+                <div className="lg:col-span-1 mb-6 lg:mb-0">
+                  <h3 className="text-xl font-display text-white mb-2">Our Growing Collective</h3>
+                  <p className="text-sage-300 text-sm">Combined expertise and achievements.</p>
                 </div>
-                <div className="p-4 md:p-8 flex flex-col justify-center">
-                  <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                    <div className="w-12 h-12 md:w-16 md:h-16 premium-gradient rounded-full flex items-center justify-center">
-                      <Crown className="h-6 w-6 md:h-8 md:w-8 text-white" />
+                <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="bg-gold-500/10 p-4 rounded-full mb-2 w-fit mx-auto">
+                      <Trophy className="h-8 w-8 text-gold-400" />
                     </div>
-                    <div>
-                      <h3 className="text-lg md:text-2xl font-display font-bold text-white">{growerProfiles[0].name}</h3>
-                      <p className="text-gold-400 font-semibold text-sm md:text-base">{growerProfiles[0].specialty}</p>
+                    <div className="text-2xl font-bold text-white">
+                      {growersData.reduce((sum, g) => sum + g.totalAwards, 0)}
                     </div>
+                    <div className="text-sage-400">Total Awards</div>
                   </div>
-                  <p className="text-sage-300 mb-4 md:mb-6 leading-relaxed text-sm md:text-base">
-                    "{growerProfiles[0].bio}"
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
-                    <div className="text-center">
-                      <div className="text-lg md:text-2xl font-bold text-gold-400">{growerProfiles[0].achievements}</div>
-                      <div className="text-sage-400 text-xs">Awards</div>
+                  <div className="text-center">
+                    <div className="bg-forest-500/10 p-4 rounded-full mb-2 w-fit mx-auto">
+                      <Sprout className="h-8 w-8 text-forest-400" />
                     </div>
-                    <div className="text-center">
-                      <div className="text-lg md:text-2xl font-bold text-forest-400">{(growerProfiles[0].followers / 1000).toFixed(1)}K</div>
-                      <div className="text-sage-400 text-xs">Followers</div>
+                    <div className="text-2xl font-bold text-white">
+                      {growersData.reduce((sum, g) => sum + parseInt(g.experience), 0)}
                     </div>
-                    <div className="text-center">
-                      <div className="text-lg md:text-2xl font-bold text-white">156</div>
-                      <div className="text-sage-400 text-xs">Harvests</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg md:text-2xl font-bold text-gold-400">23.5%</div>
-                      <div className="text-sage-400 text-xs">Avg THC</div>
-                    </div>
+                    <div className="text-sage-400">Years Combined</div>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                    <Link href="/members/growers/1">
-                      <Button className="premium-gradient text-white text-sm w-full sm:w-auto">View Portfolio</Button>
-                    </Link>
-                    <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800 text-sm w-full sm:w-auto">
-                      Follow Grower
-                    </Button>
+                  <div className="text-center">
+                    <div className="bg-emerald-500/10 p-4 rounded-full mb-2 w-fit mx-auto">
+                      <Users className="h-8 w-8 text-emerald-400" />
+                    </div>
+                    <div className="text-2xl font-bold text-white">{growersData.length}</div>
+                    <div className="text-sage-400">Master Growers</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="bg-purple-500/10 p-4 rounded-full mb-2 w-fit mx-auto">
+                      <Heart className="h-8 w-8 text-purple-400" />
+                    </div>
+                    <div className="text-2xl font-bold text-white">
+                      {(growersData.reduce((sum, g) => sum + g.followers, 0) / 1000).toFixed(1)}K
+                    </div>
+                    <div className="text-sage-400">Community</div>
                   </div>
                 </div>
               </div>
-            </Card>
-
-            {/* Growers Showcase Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              {growerProfiles.slice(1).map((grower, index) => (
-                <Card key={index} className="bg-sage-950 border-sage-800 hover-lift cursor-pointer group overflow-hidden relative">
-                  <div className="absolute top-3 md:top-4 right-3 md:right-4 z-20">
-                    <Badge className={`${
-                      grower.specialty.includes('Organic') ? 'bg-emerald-600' : 'bg-purple-600'
-                    } text-white text-xs`}>
-                      {grower.specialty.includes('Organic') ? 'Organic Expert' : 'Genetics Master'}
-                    </Badge>
-                  </div>
-                  <div className="relative h-48 md:h-64">
-                    <Image
-                      src="/placeholder.svg?height=300&width=500"
-                      alt={grower.name}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    {/* Floating Stats */}
-                    <div className="absolute top-3 md:top-4 left-3 md:left-4 space-y-2">
-                      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-2 md:px-3 py-1">
-                        <div className="flex items-center gap-1 md:gap-2">
-                          <div className={`w-2 h-2 ${
-                            grower.specialty.includes('Organic') ? 'bg-emerald-500' : 'bg-purple-500'
-                          } rounded-full`}></div>
-                          <span className="text-white text-xs md:text-sm font-medium">
-                            {grower.specialty.includes('Organic') ? 'Sustainable Growing' : 'Strain Development'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Bottom Info */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <h3 className="text-lg md:text-xl font-display font-bold text-white mb-1">{grower.name}</h3>
-                          <p className={`${
-                            grower.specialty.includes('Organic') ? 'text-emerald-400' : 'text-purple-400'
-                          } font-semibold mb-1 md:mb-2 text-sm md:text-base`}>{grower.specialty}</p>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 md:gap-4 text-xs md:text-sm text-sage-200">
-                            <span>{grower.experience} exp</span>
-                            <span className="hidden sm:inline">•</span>
-                            <span>{grower.achievements} awards</span>
-                            <span className="hidden sm:inline">•</span>
-                            <span>{(grower.followers / 1000).toFixed(1)}K followers</span>
-                          </div>
-                        </div>
-                        <div className={`w-10 h-10 md:w-12 md:h-12 ${
-                          grower.specialty.includes('Organic') ? 'bg-emerald-600' : 'bg-purple-600'
-                        } rounded-full flex items-center justify-center`}>
-                          {grower.specialty.includes('Organic') ? (
-                            <Leaf className="h-5 w-5 md:h-6 md:w-6 text-white" />
-                          ) : (
-                            <Beaker className="h-5 w-5 md:h-6 md:w-6 text-white" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="p-4 md:p-6">
-                    <p className="text-sage-300 text-xs md:text-sm mb-3 md:mb-4 leading-relaxed">
-                      "{grower.bio}"
-                    </p>
-                    {/* Specialty Tags */}
-                    <div className="flex flex-wrap gap-1 md:gap-2 mb-3 md:mb-4">
-                      {grower.specialty.includes('Organic') ? (
-                        <>
-                          <Badge variant="outline" className="border-emerald-500 text-emerald-400 text-xs">Organic Nutrients</Badge>
-                          <Badge variant="outline" className="border-emerald-500 text-emerald-400 text-xs">Water Conservation</Badge>
-                          <Badge variant="outline" className="border-emerald-500 text-emerald-400 text-xs">Soil Health</Badge>
-                        </>
-                      ) : (
-                        <>
-                          <Badge variant="outline" className="border-purple-500 text-purple-400 text-xs">Strain Development</Badge>
-                          <Badge variant="outline" className="border-purple-500 text-purple-400 text-xs">Cannabinoid Research</Badge>
-                          <Badge variant="outline" className="border-purple-500 text-purple-400 text-xs">Genetic Stability</Badge>
-                        </>
-                      )}
-                    </div>
-                    {/* Recent Achievement */}
-                    <div className={`${
-                      grower.specialty.includes('Organic') ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-purple-500/10 border-purple-500/30'
-                    } border rounded-lg p-2 md:p-3 mb-3 md:mb-4`}>
-                      <div className="flex items-center gap-1 md:gap-2 mb-1">
-                        <Trophy className={`h-3 w-3 md:h-4 md:w-4 ${
-                          grower.specialty.includes('Organic') ? 'text-emerald-500' : 'text-purple-500'
-                        }`} />
-                        <span className={`text-xs md:text-sm font-medium ${
-                          grower.specialty.includes('Organic') ? 'text-emerald-400' : 'text-purple-400'
-                        }`}>Recent Achievement</span>
-                      </div>
-                      <p className="text-sage-300 text-xs">
-                        {grower.specialty.includes('Organic') 
-                          ? 'Sustainable Grower Award 2023 - Environmental Excellence'
-                          : 'Innovation in Genetics 2022 - Breeding Excellence'
-                        }
-                      </p>
-                    </div>
-                    <Link href={`/members/growers/${index + 2}`}>
-                      <Button className={`w-full text-sm ${
-                        grower.specialty.includes('Organic') 
-                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-700' 
-                          : 'bg-gradient-to-r from-purple-500 to-purple-700'
-                      } text-white`}>View Portfolio</Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
 
-            {/* Growing Team Stats */}
-            <Card className="bg-gradient-to-r from-sage-950 to-black border-sage-800">
-              <CardHeader className="text-center p-4 md:p-6">
-                <CardTitle className="text-white font-display text-xl md:text-2xl">Our Growing Collective</CardTitle>
-                <CardDescription className="text-sage-300 text-sm">Combined expertise and achievements</CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 md:p-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-                  <div className="text-center group">
-                    <div className="w-16 h-16 md:w-20 md:h-20 premium-gradient rounded-full mx-auto mb-3 md:mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Trophy className="h-8 w-8 md:h-10 md:w-10 text-white" />
-                    </div>
-                    <div className="text-2xl md:text-3xl font-bold text-gold-400 mb-1 md:mb-2">
-                      {growerProfiles.reduce((sum, grower) => sum + grower.achievements, 0)}
-                    </div>
-                    <div className="text-sage-300 font-medium text-sm">Total Awards</div>
-                    <div className="text-sage-400 text-xs">Industry recognition</div>
-                  </div>
-
-                  <div className="text-center group">
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-forest-500 to-forest-700 rounded-full mx-auto mb-3 md:mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Sprout className="h-8 w-8 md:h-10 md:w-10 text-white" />
-                    </div>
-                    <div className="text-2xl md:text-3xl font-bold text-forest-400 mb-1 md:mb-2">
-                      {growerProfiles.reduce((sum, grower) => sum + parseInt(grower.experience), 0)}
-                    </div>
-                    <div className="text-sage-300 font-medium text-sm">Years Combined</div>
-                    <div className="text-sage-400 text-xs">Growing experience</div>
-                  </div>
-
-                  <div className="text-center group">
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full mx-auto mb-3 md:mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Beaker className="h-8 w-8 md:h-10 md:w-10 text-white" />
-                    </div>
-                    <div className="text-2xl md:text-3xl font-bold text-purple-400 mb-1 md:mb-2">12</div>
-                    <div className="text-sage-300 font-medium text-sm">Signature Strains</div>
-                    <div className="text-sage-400 text-xs">Unique genetics</div>
-                  </div>
-
-                  <div className="text-center group">
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-full mx-auto mb-3 md:mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Users className="h-8 w-8 md:h-10 md:w-10 text-white" />
-                    </div>
-                    <div className="text-2xl md:text-3xl font-bold text-emerald-400 mb-1 md:mb-2">
-                      {(growerProfiles.reduce((sum, grower) => sum + grower.followers, 0) / 1000).toFixed(1)}K
-                    </div>
-                    <div className="text-sage-300 font-medium text-sm">Community</div>
-                    <div className="text-sage-400 text-xs">Total followers</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Call to Action */}
-            <Card className="bg-gradient-to-r from-forest-950 via-sage-950 to-forest-950 border-forest-500/30 text-center">
-              <CardContent className="p-6 md:p-8">
-                <h3 className="text-xl md:text-2xl font-display font-bold text-white mb-3 md:mb-4">Join Our Growing Community</h3>
-                <p className="text-sage-300 mb-4 md:mb-6 max-w-2xl mx-auto text-sm md:text-base">
-                  Connect with master growers, learn from their expertise, and become part of a community dedicated to
-                  cannabis cultivation excellence.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-                  <Button className="premium-gradient text-white px-6 md:px-8 text-sm">
-                    <Users className="h-4 w-4 mr-2" />
-                    Join Community
-                  </Button>
-                  <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800 px-6 md:px-8 text-sm">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Learn More
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Join Our Growing Community */}
+            <div className="bg-gradient-to-r from-forest-900 to-sage-900 rounded-lg p-8 text-center">
+              <h3 className="text-2xl font-display text-white mb-2">Join Our Growing Community</h3>
+              <p className="text-sage-300 mb-6">
+                Connect with master growers, learn from their expertise, and become part of a passionate community of
+                cultivators.
+              </p>
+              <div className="flex justify-center gap-4">
+                <Button size="lg" className="premium-gradient">
+                  Join Community
+                </Button>
+                <Button size="lg" variant="outline" className="bg-black/20 border-sage-600">
+                  Learn More
+                </Button>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

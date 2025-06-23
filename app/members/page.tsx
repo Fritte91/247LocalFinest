@@ -17,6 +17,7 @@ import { toast } from "sonner"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { SizeGuide } from "@/components/ui/size-guide"
 import { MobileNav } from "@/app/components/mobile-nav"
+import { growersData } from "@/app/data/growers"
 
 // Define types for products
 interface Grower {
@@ -123,34 +124,45 @@ export default function MembersShop() {
         const data = await res.json()
         // Map API data to Product interface
         setProducts(
-          data.map((item: any) => ({
-            id: item._id,
-            name: item.name,
-            category: item.category,
-            subcategory: item.subcategory,
-            price: item.price,
-            thc: item.thc ? parseFloat(item.thc) : undefined,
-            cbd: item.cbd ? parseFloat(item.cbd) : undefined,
-            strain: item.strain,
-            indicaPercent: item.indica ? parseInt(item.indica) : undefined,
-            sativaPercent: item.sativa ? parseInt(item.sativa) : undefined,
-            rating: item.rating || 4.5,
-            reviews: item.reviews || 0,
-            inStock: item.stock,
-            lowStock: item.status === "low_stock",
-            grower: item.grower ? { name: item.grower, experience: "", specialty: "", location: "" } : undefined,
-            images: item.images || [],
-            description: item.description,
-            effects: item.effects ? item.effects.split(",").map((e: string) => e.trim()) : [],
-            terpenes: item.terpenes ? item.terpenes.split(",").map((e: string) => e.trim()) : [],
-            flavors: item.flavors ? item.flavors.split(",").map((e: string) => e.trim()) : [],
-            harvestDate: item.harvestDate,
-            artist: item.artist,
-            materials: item.materials ? item.materials.split(",").map((e: string) => e.trim()) : [],
-            dimensions: item.dimensions,
-            size: item.size,
-            edition: item.edition,
-          }))
+          data.map((item: any) => {
+            const productGrower = item.grower ? growersData.find((g) => g.name === item.grower) : undefined
+
+            return {
+              id: item._id,
+              name: item.name,
+              category: item.category,
+              subcategory: item.subcategory,
+              price: item.price,
+              thc: item.thc ? parseFloat(item.thc) : undefined,
+              cbd: item.cbd ? parseFloat(item.cbd) : undefined,
+              strain: item.strain,
+              indicaPercent: item.indica ? parseInt(item.indica) : undefined,
+              sativaPercent: item.sativa ? parseInt(item.sativa) : undefined,
+              rating: item.rating || 4.5,
+              reviews: item.reviews || 0,
+              inStock: item.stock,
+              lowStock: item.status === "low_stock",
+              grower: productGrower
+                ? {
+                    name: productGrower.name,
+                    experience: productGrower.experience,
+                    specialty: productGrower.specialty,
+                    location: productGrower.location,
+                  }
+                : undefined,
+              images: item.images || [],
+              description: item.description,
+              effects: item.effects ? item.effects.split(",").map((e: string) => e.trim()) : [],
+              terpenes: item.terpenes ? item.terpenes.split(",").map((e: string) => e.trim()) : [],
+              flavors: item.flavors ? item.flavors.split(",").map((e: string) => e.trim()) : [],
+              harvestDate: item.harvestDate,
+              artist: item.artist,
+              materials: item.materials ? item.materials.split(",").map((e: string) => e.trim()) : [],
+              dimensions: item.dimensions,
+              size: item.size,
+              edition: item.edition,
+            }
+          })
         )
       } catch (err) {
         setProducts([])
@@ -173,14 +185,14 @@ export default function MembersShop() {
     setSelectedSubCategory("all")
   }
 
-  const addToCartHandler = (product: Product) => {
+  const addToCartHandler = (product: Product, quantity = 1) => {
     const cartItem: CartItem = {
       id: product.id,
       productId: product.id,
       name: product.name,
       price: product.price,
-      quantity: 1,
-      image: product.images?.[0] || '',
+      quantity,
+      image: product.images?.[0] || "",
       category: product.category,
       grower: product.grower?.name,
       artist: product.artist,
@@ -189,7 +201,7 @@ export default function MembersShop() {
       strain: product.strain,
     }
     addToCart(cartItem)
-    toast.success(`${product.name} has been added to your cart.`)
+    toast.success(`${quantity} x ${product.name} has been added to your cart.`)
   }
 
   const handleWishlistToggle = (product: Product, e: MouseEvent<HTMLButtonElement>) => {
@@ -307,9 +319,19 @@ export default function MembersShop() {
   )
 
   const ProductDetailDialog = ({ product, onClose }: { product: Product | null; onClose: () => void }) => {
-    if (!product) return null;
-    
-    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    if (!product) return null
+
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+    const [quantity, setQuantity] = useState(1)
+
+    const handleQuantityChange = (amount: number) => {
+      setQuantity((prev) => {
+        const newQuantity = prev + amount
+        if (newQuantity < 1) return 1
+        if (product && newQuantity > product.inStock) return product.inStock
+        return newQuantity
+      })
+    }
 
     return (
       <Dialog open={!!product} onOpenChange={onClose}>
@@ -560,15 +582,52 @@ export default function MembersShop() {
                 </Button>
               </div>
 
-              <DialogFooter className="mt-8 pt-6 border-t border-sage-800 flex sm:justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className="text-3xl font-bold text-white">฿{product.price.toFixed(2)}</span>
-                  <Badge variant="outline" className="border-forest-500 text-forest-400">In Stock</Badge>
+              <DialogFooter className="mt-8 pt-6 border-t border-sage-800 flex flex-col gap-4">
+                <div className="flex justify-between items-center w-full">
+                  <span className="text-3xl font-bold text-white">฿{(product.price * quantity).toFixed(2)}</span>
+                  {product.inStock > 0 ? (
+                    <Badge variant="outline" className="border-forest-500 text-forest-400">
+                      In Stock
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive">Out of Stock</Badge>
+                  )}
                 </div>
-                <Button size="lg" className="premium-gradient" onClick={() => addToCartHandler(product)}>
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Add to Cart
-                </Button>
+                <div className="flex items-center gap-4 w-full">
+                  <div className="flex items-center gap-2 rounded-lg p-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleQuantityChange(-1)}
+                      className="h-10 w-10 bg-sage-800 border-sage-700 hover:bg-sage-700"
+                      disabled={quantity <= 1}
+                    >
+                      -
+                    </Button>
+                    <span className="text-xl font-bold w-12 text-center">{quantity}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleQuantityChange(1)}
+                      className="h-10 w-10 bg-sage-800 border-sage-700 hover:bg-sage-700"
+                      disabled={quantity >= product.inStock}
+                    >
+                      +
+                    </Button>
+                  </div>
+                  <Button
+                    size="lg"
+                    className="premium-gradient flex-grow"
+                    onClick={() => {
+                      addToCartHandler(product, quantity)
+                      onClose()
+                    }}
+                    disabled={product.inStock === 0}
+                  >
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    Add to Cart
+                  </Button>
+                </div>
               </DialogFooter>
             </div>
           </div>
