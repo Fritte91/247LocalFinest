@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -61,6 +62,22 @@ export default function CommunityPage() {
   const [selectedAward, setSelectedAward] = useState<Award | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { cart } = useApp()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Handle tab changes and update URL
+  const handleTabChange = (value: string) => {
+    // Validate that the tab value is one of the expected values
+    const validTabs = ['events', 'awards', 'education', 'growers']
+    if (!validTabs.includes(value)) {
+      console.warn(`Invalid tab value: ${value}`)
+      return
+    }
+    
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', value)
+    router.push(`/members/community?${params.toString()}`, { scroll: false })
+  }
 
   const EventDetailDialog = ({ event, onClose }: { event: Event | null; onClose: () => void }) => {
     if (!event) return null
@@ -385,7 +402,15 @@ export default function CommunityPage() {
         </div>
 
         {/* Community Tabs */}
-        <Tabs defaultValue="events" className="space-y-6 md:space-y-8">
+        <Tabs 
+          defaultValue={(() => {
+            const tabParam = searchParams.get('tab')
+            const validTabs = ['events', 'awards', 'education', 'growers']
+            return validTabs.includes(tabParam || '') ? tabParam || 'events' : 'events'
+          })()} 
+          onValueChange={handleTabChange}
+          className="space-y-6 md:space-y-8"
+        >
           <TabsList className="grid w-full grid-cols-4 bg-sage-950 border border-sage-700 p-1">
             <TabsTrigger value="events" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm py-2">
               <Calendar className="h-4 w-4" />
