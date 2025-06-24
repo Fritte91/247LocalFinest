@@ -87,6 +87,7 @@ export default function MembersShop() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showImageModal, setShowImageModal] = useState(false)
 
   const { addToCart, cart, addToWishlist, removeFromWishlist, isInWishlist } = useApp()
 
@@ -336,6 +337,7 @@ export default function MembersShop() {
 
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
     const [quantity, setQuantity] = useState(1)
+    const [showImageModal, setShowImageModal] = useState(false)
 
     const handleQuantityChange = (amount: number) => {
       setQuantity((prev) => {
@@ -347,305 +349,303 @@ export default function MembersShop() {
     }
 
     return (
-      <Dialog open={!!product} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-sage-950 border-sage-800 text-white">
-          <DialogHeader className="border-b border-sage-800 pb-4 mb-6">
-            <DialogTitle className="text-2xl font-display text-white flex items-center justify-between">
-              <span>{product.name}</span>
-              <Badge className="bg-forest-900 text-forest-400 font-semibold capitalize px-3 py-1">
-                {product.category}
-              </Badge>
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Images */}
-            <div className="space-y-4">
-              <div className="relative overflow-hidden rounded-lg border border-sage-800">
-                <Image
-                  src={product.images?.[selectedImageIndex] || "/placeholder.svg"}
-                  alt={product.name}
-                  width={400}
-                  height={400}
-                  className="w-full h-80 object-contain hover:scale-105 transition-transform duration-500"
-                />
-                {product.lowStock && (
-                  <Badge className="absolute top-3 right-3 bg-gold-600 text-white">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Low Stock!
+      <>
+        <Dialog open={!!product} onOpenChange={onClose}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-sage-950 border-sage-800 text-white">
+            <DialogHeader className="border-b border-sage-800 pb-4 mb-6">
+              <DialogTitle className="text-2xl font-display text-white flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className={`rounded-full h-8 w-8 bg-black/40 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 ${
+                      isInWishlist(product.id) 
+                        ? "text-red-400 hover:text-red-300 hover:bg-red-900/60" 
+                        : "text-sage-300 hover:text-white hover:bg-forest-700/60"
+                    }`}
+                    onClick={(e) => {
+                      handleWishlistToggle(product, e)
+                    }}
+                    aria-label="Add to wishlist"
+                  >
+                    <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-current" : ""}`} />
+                  </Button>
+                  <Badge className="bg-forest-900 text-forest-400 font-semibold capitalize px-3 py-1">
+                    {product.category}
                   </Badge>
+                  <span className="ml-2 text-white font-bold text-xl">{product.name}</span>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Images */}
+              <div className="space-y-4">
+                <div className="relative overflow-hidden rounded-lg border border-sage-800 cursor-pointer"
+                  onClick={() => setShowImageModal(true)}
+                  title="Click to view fullscreen"
+                >
+                  <Image
+                    src={product.images?.[selectedImageIndex] || "/placeholder.svg"}
+                    alt={product.name}
+                    width={400}
+                    height={400}
+                    className="w-full h-80 object-contain hover:scale-105 transition-transform duration-500"
+                  />
+                  {product.lowStock && (
+                    <Badge className="absolute top-3 right-3 bg-gold-600 text-white">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Low Stock!
+                    </Badge>
+                  )}
+                </div>
+                {product.images?.length > 1 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {product.images.map((image: string, index: number) => (
+                      <div 
+                        key={index}
+                        className={`border-2 cursor-pointer rounded-md overflow-hidden ${
+                          selectedImageIndex === index ? 'border-forest-500' : 'border-sage-800 hover:border-sage-700'
+                        }`}
+                        onClick={() => setSelectedImageIndex(index)}
+                      >
+                        <Image
+                          src={image || "/placeholder.svg"}
+                          alt={`${product.name} ${index + 2}`}
+                          width={120}
+                          height={120}
+                          className="w-full h-24 object-contain"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
-              {product.images?.length > 1 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {product.images.map((image: string, index: number) => (
-                    <div 
-                      key={index}
-                      className={`border-2 cursor-pointer rounded-md overflow-hidden ${
-                        selectedImageIndex === index ? 'border-forest-500' : 'border-sage-800 hover:border-sage-700'
-                      }`}
-                      onClick={() => setSelectedImageIndex(index)}
-                    >
-                      <Image
-                        src={image || "/placeholder.svg"}
-                        alt={`${product.name} ${index + 2}`}
-                        width={120}
-                        height={120}
-                        className="w-full h-24 object-contain"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
 
-            {/* Product Info */}
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Star className="h-5 w-5 fill-gold-400 text-gold-400" />
-                      <span className="text-lg font-semibold">{product.rating}</span>
-                      <span className="text-sage-400">({product.reviews} reviews)</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-white">฿{(product.price || 0).toFixed(2)}</div>
-                    <div className={`text-sm ${product.inStock > 0 ? 'text-forest-400' : 'text-red-400'}`}>
-                      {product.inStock > 0 ? `${product.inStock} in stock` : "Out of stock"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-sage-900/50 rounded-lg p-4 my-6">
-                  <p className="text-sage-300 leading-relaxed">{product.description}</p>
-                </div>
-              </div>
-
-              {/* Cannabis-specific info */}
-              {product.category === "flowers" && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    {product.thc && (
-                      <div className="bg-sage-900 p-3 rounded-lg">
-                        <div className="text-sm text-sage-400 mb-1">THC Content</div>
-                        <div className="text-lg font-bold text-white">{product.thc}%</div>
+              {/* Product Info */}
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Star className="h-5 w-5 fill-gold-400 text-gold-400" />
+                        <span className="text-lg font-semibold">{product.rating}</span>
+                        <span className="text-sage-400">({product.reviews} reviews)</span>
                       </div>
-                    )}
-                    {product.cbd && (
-                      <div className="bg-sage-900 p-3 rounded-lg">
-                        <div className="text-sm text-sage-400 mb-1">CBD Content</div>
-                        <div className="text-lg font-bold text-white">{product.cbd}%</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-white">฿{(product.price || 0).toFixed(2)}</div>
+                      <div className={`text-sm ${product.inStock > 0 ? 'text-forest-400' : 'text-red-400'}`}>
+                        {product.inStock > 0 ? `${product.inStock} in stock` : "Out of stock"}
                       </div>
-                    )}
+                    </div>
                   </div>
 
-                  {product.category === 'flowers' && (product.sativaPercent || product.indicaPercent) && (
-                    <div className="mt-4">
-                      <div className="text-sm text-sage-400 mb-2">Strain Composition</div>
-                      {product.sativaPercent && (
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-white">Sativa</span>
-                          <span className="text-white font-semibold">{product.sativaPercent}%</span>
+                  <div className="bg-sage-900/50 rounded-lg p-4 my-6">
+                    <p className="text-sage-300 leading-relaxed">{product.description}</p>
+                  </div>
+                </div>
+
+                {/* Cannabis-specific info */}
+                {product.category === "flowers" && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      {product.thc && (
+                        <div className="bg-sage-900 p-3 rounded-lg">
+                          <div className="text-sm text-sage-400 mb-1">THC Content</div>
+                          <div className="text-lg font-bold text-white">{product.thc}%</div>
                         </div>
                       )}
-                      <Progress value={(product.sativaPercent || 0) + (product.indicaPercent || 0)} className="w-full [&>div]:bg-gradient-to-r [&>div]:from-green-400 [&>div]:to-purple-500" />
-                      {product.indicaPercent && (
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-white">Indica</span>
-                          <span className="text-white font-semibold">{product.indicaPercent}%</span>
+                      {product.cbd && (
+                        <div className="bg-sage-900 p-3 rounded-lg">
+                          <div className="text-sm text-sage-400 mb-1">CBD Content</div>
+                          <div className="text-lg font-bold text-white">{product.cbd}%</div>
                         </div>
                       )}
                     </div>
-                  )}
 
-                  {product.effects && (
-                    <div className="mb-4">
-                      <div className="text-sm text-sage-400 mb-2">Effects</div>
-                      <div className="flex flex-wrap gap-2">
-                        {product.effects.map((effect: string, index: number) => (
-                          <Badge key={index} variant="outline" className="border-forest-500 text-forest-400 px-3 py-1">
-                            {effect}
-                          </Badge>
-                        ))}
+                    {product.category === 'flowers' && (product.sativaPercent || product.indicaPercent) && (
+                      <div className="mt-4">
+                        <div className="text-sm text-sage-400 mb-2">Strain Composition</div>
+                        {product.sativaPercent && (
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-white">Sativa</span>
+                            <span className="text-white font-semibold">{product.sativaPercent}%</span>
+                          </div>
+                        )}
+                        <Progress value={(product.sativaPercent || 0) + (product.indicaPercent || 0)} className="w-full [&>div]:bg-gradient-to-r [&>div]:from-green-400 [&>div]:to-purple-500" />
+                        {product.indicaPercent && (
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-white">Indica</span>
+                            <span className="text-white font-semibold">{product.indicaPercent}%</span>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {product.terpenes && (
-                    <div className="mb-4">
-                      <div className="text-sm text-sage-400 mb-2">Terpenes</div>
-                      <div className="flex flex-wrap gap-2">
-                        {product.terpenes.map((terpene: string, index: number) => (
-                          <Badge key={index} variant="outline" className="border-purple-500 text-purple-400 px-3 py-1">
-                            {terpene}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {product.flavors && (
-                    <div className="mb-4">
-                      <div className="text-sm text-sage-400 mb-2">Flavors</div>
-                      <div className="flex flex-wrap gap-2">
-                        {product.flavors.map((flavor: string, index: number) => (
-                          <Badge key={index} variant="outline" className="border-gold-500 text-gold-400 px-3 py-1">
-                            {flavor}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Grower Info */}
-                  {product.grower && (
-                    <div className="bg-gradient-to-r from-sage-900/50 to-sage-950 rounded-lg p-4 border border-sage-800/50">
-                      <div className="flex items-center gap-3 mb-3">
-                        <Award className="h-5 w-5 text-gold-500" />
-                        <span className="font-semibold text-white">Master Grower</span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sage-400">Name:</span>
-                          <span className="text-white font-semibold">{product.grower.name}</span>
+                    {product.effects && (
+                      <div className="mb-4">
+                        <div className="text-sm text-sage-400 mb-2">Effects</div>
+                        <div className="flex flex-wrap gap-2">
+                          {product.effects.map((effect: string, index: number) => (
+                            <Badge key={index} variant="outline" className="border-forest-500 text-forest-400 px-3 py-1">
+                              {effect}
+                            </Badge>
+                          ))}
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-sage-400">Experience:</span>
-                          <span className="text-forest-400">{product.grower.experience}</span>
+                      </div>
+                    )}
+
+                    {product.terpenes && (
+                      <div className="mb-4">
+                        <div className="text-sm text-sage-400 mb-2">Terpenes</div>
+                        <div className="flex flex-wrap gap-2">
+                          {product.terpenes.map((terpene: string, index: number) => (
+                            <Badge key={index} variant="outline" className="border-purple-500 text-purple-400 px-3 py-1">
+                              {terpene}
+                            </Badge>
+                          ))}
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-sage-400">Specialty:</span>
-                          <span className="text-sage-300">{product.grower.specialty}</span>
+                      </div>
+                    )}
+
+                    {product.flavors && (
+                      <div className="mb-4">
+                        <div className="text-sm text-sage-400 mb-2">Flavors</div>
+                        <div className="flex flex-wrap gap-2">
+                          {product.flavors.map((flavor: string, index: number) => (
+                            <Badge key={index} variant="outline" className="border-gold-500 text-gold-400 px-3 py-1">
+                              {flavor}
+                            </Badge>
+                          ))}
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sage-400">Location:</span>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4 text-gold-500" />
-                            <span className="text-sage-300">{product.grower.location}</span>
+                      </div>
+                    )}
+
+                    {/* Grower Info */}
+                    {product.grower && (
+                      <div className="bg-gradient-to-r from-sage-900/50 to-sage-950 rounded-lg p-4 border border-sage-800/50">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Award className="h-5 w-5 text-gold-500" />
+                          <span className="font-semibold text-white">Master Grower</span>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sage-400">Name:</span>
+                            <span className="text-white font-semibold">{product.grower.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sage-400">Experience:</span>
+                            <span className="text-forest-400">{product.grower.experience}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sage-400">Specialty:</span>
+                            <span className="text-sage-300">{product.grower.specialty}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sage-400">Location:</span>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4 text-gold-500" />
+                              <span className="text-sage-300">{product.grower.location}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Glassware/Artwork info */}
-              {(product.category === "glassware" || product.category === "artwork") && (
-                <div className="space-y-4">
-                  <div className="bg-gradient-to-r from-sage-900/50 to-sage-950 rounded-lg p-4 border border-sage-800/50">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Award className="h-5 w-5 text-gold-500" />
-                      <span className="font-semibold text-white">Artist</span>
-                    </div>
-                    <div className="text-lg text-gold-400 font-semibold">{product.artist}</div>
+                    )}
                   </div>
+                )}
 
-                  {product.materials && (
-                    <div>
-                      <div className="text-sm text-sage-400 mb-2">Materials</div>
-                      <div className="flex flex-wrap gap-2">
-                        {product.materials.map((material: string, index: number) => (
-                          <Badge key={index} variant="outline" className="border-sage-500 text-sage-400 px-3 py-1">
-                            {material}
-                          </Badge>
-                        ))}
+                {/* Glassware/Artwork info */}
+                {(product.category === "glassware" || product.category === "artwork") && (
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-sage-900/50 to-sage-950 rounded-lg p-4 border border-sage-800/50">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Award className="h-5 w-5 text-gold-500" />
+                        <span className="font-semibold text-white">Artist</span>
                       </div>
+                      <div className="text-lg text-gold-400 font-semibold">{product.artist}</div>
                     </div>
-                  )}
 
-                  {product.dimensions && (
-                    <div className="flex justify-between">
-                      <span className="text-sage-400">Dimensions:</span>
-                      <span className="text-white">{product.dimensions}</span>
+                    {product.materials && (
+                      <div>
+                        <div className="text-sm text-sage-400 mb-2">Materials</div>
+                        <div className="flex flex-wrap gap-2">
+                          {product.materials.map((material: string, index: number) => (
+                            <Badge key={index} variant="outline" className="border-sage-500 text-sage-400 px-3 py-1">
+                              {material}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {product.dimensions && (
+                      <div className="flex justify-between">
+                        <span className="text-sage-400">Dimensions:</span>
+                        <span className="text-white">{product.dimensions}</span>
+                      </div>
+                    )}
+
+                    {product.edition && (
+                      <div className="flex justify-between">
+                        <span className="text-sage-400">Edition:</span>
+                        <span className="text-gold-400">{product.edition}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {product.category === "glassware" && (
+                  <div className="mt-6">
+                    <SizeGuide />
+                  </div>
+                )}
+
+                <DialogFooter className="mt-8 pt-6 border-t border-sage-800 flex flex-col gap-4">
+                  <div className="flex justify-between items-center w-full">
+                    <span className="text-3xl font-bold text-white">฿{(product.price * quantity).toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center gap-4 w-full">
+                    <div className="flex items-center gap-2 rounded-lg p-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleQuantityChange(-1)}
+                        className="h-10 w-10 bg-sage-800 border-sage-700 hover:bg-sage-700"
+                        disabled={quantity <= 1}
+                      >
+                        -
+                      </Button>
+                      <span className="text-xl font-bold w-12 text-center">{quantity}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleQuantityChange(1)}
+                        className="h-10 w-10 bg-sage-800 border-sage-700 hover:bg-sage-700"
+                        disabled={quantity >= product.inStock}
+                      >
+                        +
+                      </Button>
                     </div>
-                  )}
-
-                  {product.edition && (
-                    <div className="flex justify-between">
-                      <span className="text-sage-400">Edition:</span>
-                      <span className="text-gold-400">{product.edition}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {product.category === "glassware" && (
-                <div className="mt-6">
-                  <SizeGuide />
-                </div>
-              )}
-
-              <div className="absolute top-0 right-0 z-10 p-2">
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className={`rounded-full h-8 w-8 bg-black/40 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 ${
-                    isInWishlist(product.id) 
-                      ? "text-red-400 hover:text-red-300 hover:bg-red-900/60" 
-                      : "text-sage-300 hover:text-white hover:bg-forest-700/60"
-                  }`}
-                  onClick={(e) => {
-                    handleWishlistToggle(product, e)
-                  }}
-                >
-                  <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-current" : ""}`} />
-                </Button>
-              </div>
-
-              <DialogFooter className="mt-8 pt-6 border-t border-sage-800 flex flex-col gap-4">
-                <div className="flex justify-between items-center w-full">
-                  <span className="text-3xl font-bold text-white">฿{(product.price * quantity).toFixed(2)}</span>
-                  {product.inStock > 0 ? (
-                    <Badge variant="outline" className="border-forest-500 text-forest-400">
-                      In Stock
-                    </Badge>
-                  ) : (
-                    <Badge variant="destructive">Out of Stock</Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-4 w-full">
-                  <div className="flex items-center gap-2 rounded-lg p-1">
                     <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleQuantityChange(-1)}
-                      className="h-10 w-10 bg-sage-800 border-sage-700 hover:bg-sage-700"
-                      disabled={quantity <= 1}
+                      size="lg"
+                      className="premium-gradient flex-grow"
+                      onClick={() => {
+                        addToCartHandler(product, quantity)
+                        onClose()
+                      }}
+                      disabled={product.inStock === 0}
                     >
-                      -
-                    </Button>
-                    <span className="text-xl font-bold w-12 text-center">{quantity}</span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleQuantityChange(1)}
-                      className="h-10 w-10 bg-sage-800 border-sage-700 hover:bg-sage-700"
-                      disabled={quantity >= product.inStock}
-                    >
-                      +
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Add to Cart
                     </Button>
                   </div>
-                  <Button
-                    size="lg"
-                    className="premium-gradient flex-grow"
-                    onClick={() => {
-                      addToCartHandler(product, quantity)
-                      onClose()
-                    }}
-                    disabled={product.inStock === 0}
-                  >
-                    <ShoppingCart className="h-5 w-5 mr-2" />
-                    Add to Cart
-                  </Button>
-                </div>
-              </DialogFooter>
+                </DialogFooter>
+              </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      </>
     )
   }
 

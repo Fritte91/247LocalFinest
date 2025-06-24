@@ -151,15 +151,15 @@ export default function ArticlePage() {
 
           {/* Action Buttons */}
           <div className="flex gap-3 mb-8">
-            <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
+            <Button variant="default" className="bg-forest-700 hover:bg-forest-600 text-white border-none shadow-md">
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>
-            <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
+            <Button variant="default" className="bg-forest-700 hover:bg-forest-600 text-white border-none shadow-md">
               <Bookmark className="h-4 w-4 mr-2" />
               Save
             </Button>
-            <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
+            <Button variant="default" className="bg-forest-700 hover:bg-forest-600 text-white border-none shadow-md">
               <ThumbsUp className="h-4 w-4 mr-2" />
               Like
             </Button>
@@ -233,7 +233,7 @@ export default function ArticlePage() {
         {/* Back to Community */}
         <div className="text-center">
           <Link href={`/members/community?tab=education${category ? `&category=${category.id}` : ''}`}>
-            <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
+            <Button className="premium-gradient text-white font-semibold px-6 py-3 rounded-lg shadow-md">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Education Hub
             </Button>

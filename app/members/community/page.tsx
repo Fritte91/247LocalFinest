@@ -444,20 +444,20 @@ export default function CommunityPage() {
           onValueChange={handleTabChange}
           className="space-y-6 md:space-y-8"
         >
-          <TabsList className="grid w-full grid-cols-4 bg-sage-950 border border-sage-700 p-1">
-            <TabsTrigger value="events" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm py-2">
+          <TabsList className="grid w-full grid-cols-4 bg-sage-950 border border-sage-700 h-12 rounded-xl overflow-hidden items-center p-0">
+            <TabsTrigger value="events" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm h-12 px-0 font-semibold rounded-none">
               <Calendar className="h-4 w-4" />
               <span>Events</span>
             </TabsTrigger>
-            <TabsTrigger value="awards" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm py-2">
+            <TabsTrigger value="awards" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm h-12 px-0 font-semibold rounded-none">
               <Trophy className="h-4 w-4" />
               <span>Awards</span>
             </TabsTrigger>
-            <TabsTrigger value="education" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm py-2">
+            <TabsTrigger value="education" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm h-12 px-0 font-semibold rounded-none">
               <BookOpen className="h-4 w-4" />
               <span>Learn</span>
             </TabsTrigger>
-            <TabsTrigger value="growers" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm py-2">
+            <TabsTrigger value="growers" className="data-[state=active]:bg-forest-600 data-[state=active]:text-white flex items-center justify-center gap-2 text-xs md:text-sm h-12 px-0 font-semibold rounded-none">
               <Users className="h-4 w-4" />
               <span>Growers</span>
             </TabsTrigger>
