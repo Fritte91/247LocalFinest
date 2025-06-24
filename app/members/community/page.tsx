@@ -684,7 +684,6 @@ export default function CommunityPage() {
                     fill
                     className="object-cover rounded-2xl shadow-2xl border-4 border-forest-700/40"
                     priority
-                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-2xl" />
                 </div>

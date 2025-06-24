@@ -432,7 +432,7 @@ export default function AdminDashboard() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ _id: id, ...updates }),
+        body: JSON.stringify({ id, ...updates }),
       })
 
       if (!response.ok) throw new Error('Failed to update product')
@@ -578,7 +578,7 @@ export default function AdminDashboard() {
               <DollarSign className="h-4 w-4 text-gold-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">${formatNumber(stats.totalRevenue)}</div>
+              <div className="text-2xl font-bold text-white">฿{formatNumber(stats.totalRevenue)}</div>
             </CardContent>
           </Card>
 
@@ -674,9 +674,9 @@ export default function AdminDashboard() {
                         <TableHead className="text-sage-300">Image</TableHead>
                         <TableHead className="text-sage-300">Product Name</TableHead>
                         <TableHead className="text-sage-300">Category</TableHead>
+                        <TableHead className="text-sage-300">Stock</TableHead>
                         <TableHead className="text-sage-300">Retail Price</TableHead>
                         <TableHead className="text-sage-300">Wholesale Price</TableHead>
-                        <TableHead className="text-sage-300">Stock</TableHead>
                         <TableHead className="text-sage-300">Status</TableHead>
                         <TableHead className="text-sage-300">Creator</TableHead>
                         <TableHead className="text-sage-300">Actions</TableHead>
@@ -711,14 +711,19 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-white">${(product.retailPrice || 0).toFixed(2)}</TableCell>
-                          <TableCell className="text-white">${(product.wholesalePrice || 0).toFixed(2)}</TableCell>
                           <TableCell>
                             {editingProduct === product._id ? (
                               <Input
                                 type="number"
+                                step="1"
+                                min="0"
+                                pattern="[0-9]*"
                                 defaultValue={product.stock}
-                                className="w-20 bg-black border-sage-700 text-white"
+                                className="w-20 bg-black border-sage-700 text-white mb-2 custom-number-input"
+                                onWheel={e => e.currentTarget.blur()}
+                                onKeyDown={e => {
+                                  if (e.key === '.' || e.key === ',') e.preventDefault();
+                                }}
                                 onBlur={(e) =>
                                   handleUpdateProduct(product._id, { stock: Number.parseInt(e.target.value) })
                                 }
@@ -733,6 +738,40 @@ export default function AdminDashboard() {
                               >
                                 {product.stock}
                               </span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {editingProduct === product._id ? (
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                defaultValue={product.retailPrice}
+                                className="w-24 bg-black border-sage-700 text-white mb-2 custom-number-input"
+                                onWheel={e => e.currentTarget.blur()}
+                                onBlur={(e) =>
+                                  handleUpdateProduct(product._id, { retailPrice: Number.parseFloat(e.target.value) })
+                                }
+                              />
+                            ) : (
+                              <span className="text-white">฿{(product.retailPrice || 0).toFixed(2)}</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {editingProduct === product._id ? (
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                defaultValue={product.wholesalePrice}
+                                className="w-24 bg-black border-sage-700 text-white mb-2 custom-number-input"
+                                onWheel={e => e.currentTarget.blur()}
+                                onBlur={(e) =>
+                                  handleUpdateProduct(product._id, { wholesalePrice: Number.parseFloat(e.target.value) })
+                                }
+                              />
+                            ) : (
+                              <span className="text-white">฿{(product.wholesalePrice || 0).toFixed(2)}</span>
                             )}
                           </TableCell>
                           <TableCell>{getStatusBadge(product.status)}</TableCell>
@@ -1138,7 +1177,7 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                           <TableCell className="text-white font-semibold">
-                            ${(order.totalAmount || 0).toFixed(2)}
+                            ฿{(order.totalAmount || 0).toFixed(2)}
                           </TableCell>
                           <TableCell>
                             {getOrderStatusBadge(order.status)}
@@ -1193,13 +1232,13 @@ export default function AdminDashboard() {
                     <div className="flex justify-between items-center p-4 dark-glass rounded-lg">
                       <span className="text-sage-300">This Month</span>
                       <span className="font-semibold text-forest-400 text-xl">
-                        ${formatNumber(stats.thisMonthRevenue)}
+                        ฿{formatNumber(stats.thisMonthRevenue)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center p-4 dark-glass rounded-lg">
                       <span className="text-sage-300">Last Month</span>
                       <span className="font-semibold text-sage-300 text-xl">
-                        ${formatNumber(stats.lastMonthRevenue)}
+                        ฿{formatNumber(stats.lastMonthRevenue)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center p-4 dark-glass rounded-lg">
@@ -1229,7 +1268,7 @@ export default function AdminDashboard() {
                     {analytics?.topProducts?.slice(0, 5).map((product: any, index: number) => (
                       <div key={index} className="flex justify-between items-center p-4 dark-glass rounded-lg">
                         <span className="text-sage-300">{product.name}</span>
-                        <span className="font-semibold text-forest-400">{product.quantity} sold</span>
+                        <span className="font-semibold text-forest-400">฿{product.quantity} sold</span>
                       </div>
                     ))}
                     {(!analytics?.topProducts || analytics.topProducts.length === 0) && (
@@ -1254,7 +1293,7 @@ export default function AdminDashboard() {
                       <div key={index} className="p-4 dark-glass rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sage-300 font-medium capitalize">{category.category}</span>
-                          <span className="text-white font-semibold">${formatNumber(category.revenue)}</span>
+                          <span className="text-white font-semibold">฿{formatNumber(category.revenue)}</span>
                         </div>
                         <div className="text-sm text-sage-400">
                           {category.quantity} items sold
@@ -1283,7 +1322,7 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-white font-semibold">${formatNumber(order.totalAmount)}</span>
+                          <span className="text-white font-semibold">฿{(order.totalAmount || 0).toFixed(2)}</span>
                           <div className="text-sm text-sage-400 capitalize">{getOrderStatusBadge(order.status)}</div>
                         </div>
                       </div>
@@ -1474,13 +1513,11 @@ export default function AdminDashboard() {
                             <p className="text-white font-medium">
                               {item.product?.name || 'Product not found'}
                             </p>
-                            <p className="text-sage-300 text-sm">
-                              Qty: {item.quantity} × ${(item.price || 0).toFixed(2)} each
-                            </p>
+                            <p className="text-sage-300 text-sm">Qty: {item.quantity} × ฿{(item.price || 0).toFixed(2)} each</p>
                           </div>
                           <div className="text-right">
                             <p className="text-white font-semibold">
-                              ${((item.price || 0) * item.quantity).toFixed(2)}
+                              ฿{((item.price || 0) * item.quantity).toFixed(2)}
                             </p>
                           </div>
                         </div>
@@ -1499,7 +1536,7 @@ export default function AdminDashboard() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sage-300">Subtotal:</span>
-                        <span className="text-white">${(selectedOrder.totalAmount || 0).toFixed(2)}</span>
+                        <span className="text-white">฿{(selectedOrder.totalAmount || 0).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sage-300">Payment Status:</span>

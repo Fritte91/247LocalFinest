@@ -138,6 +138,7 @@ export default function ArticlesPage() {
               src="/images/indoor.webp"
               alt="Cannabis Knowledge"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw" // Adjust as needed
               className="object-cover rounded-2xl shadow-2xl border-4 border-forest-700/40"
               priority
             />
