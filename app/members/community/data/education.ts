@@ -27,6 +27,8 @@ export interface Article {
   featured?: boolean
   trending?: boolean
   slug: string
+  content?: string // JSX content as string or component reference
+  hasCustomComponent?: boolean // Flag for articles with custom components
 }
 
 export interface PopularTopic {
@@ -118,8 +120,9 @@ export const articleCategories: ArticleCategory[] = [
 ]
 
 export const articles: Article[] = [
+  // --- Growing & Cultivation ---
   {
-    id: 'indoor-cultivation-guide',
+    id: 'indoor-cultivating-guide',
     title: "The Complete Guide to Indoor Cannabis Cultivation",
     author: "Marcus Chen",
     readTime: "15 min read",
@@ -130,14 +133,11 @@ export const articles: Article[] = [
     publishDate: "March 15, 2024",
     tags: ["Indoor Growing", "Setup Guide", "Expert Tips"],
     difficulty: "Advanced",
-    views: 15420,
-    rating: 4.8,
-    featured: true,
-    trending: true,
-    slug: "indoor-cultivation-guide"
+    slug: "indoor-cultivating-guide",
+    hasCustomComponent: true
   },
   {
-    id: 'harvest-curing-techniques',
+    id: 'harvestcuring',
     title: "Harvest & Curing Techniques: Perfecting Your Buds",
     author: "Dr. Rachel Lee",
     readTime: "11 min read",
@@ -148,79 +148,11 @@ export const articles: Article[] = [
     publishDate: "April 25, 2024",
     tags: ["Harvest", "Curing", "Postharvest"],
     difficulty: "Intermediate",
-    views: 12850,
-    rating: 4.9,
-    trending: true,
-    slug: "harvest-curing-techniques"
+    slug: "harvestcuring",
+    hasCustomComponent: true
   },
   {
-    id: 'terpene-profiles-explained',
-    title: "Terpene Profiles Explained: A Complete Guide",
-    author: "Sarah Rodriguez",
-    readTime: "8 min read",
-    category: "Terpenes & Science",
-    categorySlug: "terpenes",
-    image: "/images/weed2.jpg",
-    description: "Understand how different terpene profiles affect cannabis effects and flavors. Explore the science behind cannabis aromas and their therapeutic benefits.",
-    publishDate: "March 20, 2024",
-    tags: ["Terpenes", "Science", "Aromas"],
-    difficulty: "Intermediate",
-    views: 9870,
-    rating: 4.7,
-    slug: "terpene-profiles-explained"
-  },
-  {
-    id: 'cbd-pain-management',
-    title: "CBD for Pain Management: A Comprehensive Guide",
-    author: "Dr. Lisa Chen",
-    readTime: "12 min read",
-    category: "Health & Benefits",
-    categorySlug: "health",
-    image: "/images/weed3.jpg",
-    description: "Learn how CBD can help manage different types of pain, from chronic conditions to acute injuries. Discover dosage guidelines and consumption methods.",
-    publishDate: "May 10, 2024",
-    tags: ["CBD", "Pain Management", "Medical"],
-    difficulty: "Beginner",
-    views: 18750,
-    rating: 4.8,
-    trending: true,
-    slug: "cbd-pain-management"
-  },
-  {
-    id: 'vaporizer-guide-2024',
-    title: "Vaporizer Buying Guide 2024: Top Picks & Reviews",
-    author: "Equipment Team",
-    readTime: "13 min read",
-    category: "Tools & Equipment",
-    categorySlug: "tools",
-    image: "/images/weed4.jpg",
-    description: "Our comprehensive review of the best vaporizers available this year, from budget to premium options. Find the perfect device for your needs.",
-    publishDate: "June 5, 2024",
-    tags: ["Vaporizers", "Reviews", "Equipment"],
-    difficulty: "Beginner",
-    views: 11230,
-    rating: 4.6,
-    slug: "vaporizer-guide-2024"
-  },
-  {
-    id: 'microdosing-guide',
-    title: "Microdosing: A Beginner's Guide to Cannabis",
-    author: "Dr. Lisa Chen",
-    readTime: "7 min read",
-    category: "Health & Benefits",
-    categorySlug: "health",
-    image: "/images/weed5.jpg",
-    description: "Learn the art of microdosing cannabis for therapeutic benefits without overwhelming psychoactive effects. Perfect for beginners and medical users.",
-    publishDate: "April 15, 2024",
-    tags: ["Microdosing", "Beginner", "Therapeutic"],
-    difficulty: "Beginner",
-    views: 15680,
-    rating: 4.9,
-    trending: true,
-    slug: "microdosing-guide"
-  },
-  {
-    id: 'lighting-maximum-yield',
+    id: 'lightningforyield',
     title: "Lighting for Maximum Yield: Optimizing Cannabis Growth",
     author: "Dr. Emily Nguyen",
     readTime: "12 min read",
@@ -231,45 +163,11 @@ export const articles: Article[] = [
     publishDate: "May 10, 2024",
     tags: ["Lighting", "Yield", "Technology"],
     difficulty: "Advanced",
-    views: 8920,
-    rating: 4.7,
-    slug: "lighting-maximum-yield"
+    slug: "lightningforyield",
+    hasCustomComponent: true
   },
   {
-    id: 'myrcene-vs-limonene',
-    title: "Myrcene vs Limonene: Understanding the Differences",
-    author: "David Thompson",
-    readTime: "6 min read",
-    category: "Terpenes & Science",
-    categorySlug: "terpenes",
-    image: "/images/weed7.jpg",
-    description: "Compare two of the most important cannabis terpenes and their unique effects. Understand how myrcene and limonene contribute to different strain experiences.",
-    publishDate: "April 15, 2024",
-    tags: ["Terpenes", "Myrcene", "Limonene"],
-    difficulty: "Intermediate",
-    views: 7430,
-    rating: 4.5,
-    slug: "myrcene-vs-limonene"
-  },
-  {
-    id: 'cannabis-sleep-quality',
-    title: "Cannabis and Sleep Quality: Best Strains & Methods",
-    author: "Marcus Chen",
-    readTime: "10 min read",
-    category: "Health & Benefits",
-    categorySlug: "health",
-    image: "/images/weed8.jpg",
-    description: "Discover which strains and consumption methods work best for improving sleep quality and duration. Learn about timing, dosage, and strain selection.",
-    publishDate: "March 25, 2024",
-    tags: ["Sleep", "Strains", "Wellness"],
-    difficulty: "Beginner",
-    views: 13450,
-    rating: 4.8,
-    trending: true,
-    slug: "cannabis-sleep-quality"
-  },
-  {
-    id: 'soil-vs-hydroponic',
+    id: 'soilvshydroponic',
     title: "Soil vs Hydroponic Systems: A Complete Comparison",
     author: "Sarah Rodriguez",
     readTime: "10 min read",
@@ -280,12 +178,11 @@ export const articles: Article[] = [
     publishDate: "June 5, 2024",
     tags: ["Growing Systems", "Comparison", "Hydroponics"],
     difficulty: "Intermediate",
-    views: 6780,
-    rating: 4.6,
-    slug: "soil-vs-hydroponic"
+    slug: "soilvshydroponic",
+    hasCustomComponent: true
   },
   {
-    id: 'organic-vs-synthetic-nutrients',
+    id: 'nutrient',
     title: "Organic vs Synthetic Nutrients: Which is Better?",
     author: "Sarah Rodriguez",
     readTime: "9 min read",
@@ -296,13 +193,136 @@ export const articles: Article[] = [
     publishDate: "May 20, 2024",
     tags: ["Nutrients", "Organic", "Synthetic"],
     difficulty: "Intermediate",
-    views: 5670,
-    rating: 4.4,
-    slug: "organic-vs-synthetic-nutrients"
+    slug: "nutrient",
+    hasCustomComponent: true
+  },
+
+  // --- Terpenes & Science ---
+  {
+    id: 'terpene-guide',
+    title: "Understanding Cannabis Terpenes: The Complete Guide",
+    author: "Dr. Sarah Rodriguez",
+    readTime: "8 min read",
+    category: "Terpenes & Science",
+    categorySlug: "terpenes",
+    image: "/images/weed2.jpg",
+    description: "Understand how different terpene profiles affect cannabis effects and flavors. Explore the science behind cannabis aromas and their therapeutic benefits.",
+    publishDate: "March 20, 2024",
+    tags: ["Terpenes", "Science", "Aromas"],
+    difficulty: "Intermediate",
+    slug: "terpene-guide",
+    hasCustomComponent: true
   },
   {
-    id: 'anxiety-relief-strains',
-    title: "Anxiety Relief Strains: Finding Your Perfect Match",
+    id: 'myrcenevslimonene',
+    title: "Myrcene vs Limonene: Understanding the Differences",
+    author: "David Thompson",
+    readTime: "6 min read",
+    category: "Terpenes & Science",
+    categorySlug: "terpenes",
+    image: "/images/weed7.jpg",
+    description: "Compare two of the most important cannabis terpenes and their unique effects. Understand how myrcene and limonene contribute to different strain experiences.",
+    publishDate: "April 15, 2024",
+    tags: ["Terpenes", "Myrcene", "Limonene"],
+    difficulty: "Intermediate",
+    slug: "myrcenevslimonene",
+    hasCustomComponent: true
+  },
+  {
+    id: 'entourageeffect',
+    title: 'The Entourage Effect: How Cannabis Compounds Work Together',
+    author: 'Dr. Sarah Rodriguez',
+    readTime: '11 min read',
+    category: 'Terpenes & Science',
+    categorySlug: 'terpenes',
+    image: '/images/weed2.jpg',
+    description: 'Explore the entourage effect, where cannabinoids and terpenes synergize to enhance cannabis\'s therapeutic and sensory properties.',
+    publishDate: 'May 25, 2025',
+    tags: ['Terpenes', 'Entourage Effect', 'Science'],
+    difficulty: 'Intermediate',
+    slug: 'entourageeffect',
+    hasCustomComponent: true
+  },
+  {
+    id: 'preservinterpenes',
+    title: 'Preserving Terpenes in Curing: Best Practices',
+    author: 'Dr. Rachel Lee',
+    readTime: '10 min read',
+    category: 'Terpenes & Science',
+    categorySlug: 'terpenes',
+    image: '/images/weed2.jpg',
+    description: 'Learn how to preserve terpenes during curing to maintain cannabis aroma, flavor, and potency. Discover techniques to protect these volatile compounds.',
+    publishDate: 'May 20, 2025',
+    tags: ['Terpenes', 'Curing', 'Preservation'],
+    difficulty: 'Intermediate',
+    slug: 'preservinterpenes',
+    hasCustomComponent: true
+  },
+  {
+    id: 'terpenesprofiles',
+    title: 'Terpene Profiles Explained: Unlocking Cannabis Aromas',
+    author: 'Dr. Sarah Rodriguez',
+    readTime: '10 min read',
+    category: 'Terpenes & Science',
+    categorySlug: 'terpenes',
+    image: '/images/weed2.jpg',
+    description: 'Dive into the world of terpene profiles to understand how these compounds shape cannabis aromas, flavors, and effects, creating unique strain characteristics.',
+    publishDate: 'May 10, 2025',
+    tags: ['Terpenes', 'Profiles', 'Aromas'],
+    difficulty: 'Intermediate',
+    slug: 'terpenesprofiles',
+    hasCustomComponent: true
+  },
+
+  // --- Health & Benefits ---
+  {
+    id: 'CBDpainmanagement',
+    title: "CBD for Pain Management: A Comprehensive Guide",
+    author: "Dr. Lisa Chen",
+    readTime: "12 min read",
+    category: "Health & Benefits",
+    categorySlug: "health",
+    image: "/images/weed3.jpg",
+    description: "Learn how CBD can help manage different types of pain, from chronic conditions to acute injuries. Discover dosage guidelines and consumption methods.",
+    publishDate: "May 10, 2024",
+    tags: ["CBD", "Pain Management", "Medical"],
+    difficulty: "Beginner",
+    slug: "CBDpainmanagement",
+    hasCustomComponent: true
+  },
+  {
+    id: 'Microdosing-guide',
+    title: "Microdosing: A Beginner's Guide to Cannabis",
+    author: "Dr. Lisa Chen",
+    readTime: "7 min read",
+    category: "Health & Benefits",
+    categorySlug: "health",
+    image: "/images/weed5.jpg",
+    description: "Learn the art of microdosing cannabis for therapeutic benefits without overwhelming psychoactive effects. Perfect for beginners and medical users.",
+    publishDate: "April 15, 2024",
+    tags: ["Microdosing", "Beginner", "Therapeutic"],
+    difficulty: "Beginner",
+    slug: "Microdosing-guide",
+    hasCustomComponent: true
+  },
+  {
+    id: 'CannabisSleep',
+    title: "Cannabis and Sleep Quality: Best Strains & Methods",
+    author: "Marcus Chen",
+    readTime: "10 min read",
+    category: "Health & Benefits",
+    categorySlug: "health",
+    image: "/images/weed8.jpg",
+    description: "Discover which strains and consumption methods work best for improving sleep quality and duration. Learn about timing, dosage, and strain selection.",
+    publishDate: "March 25, 2024",
+    tags: ["Sleep", "Strains", "Wellness"],
+    difficulty: "Beginner",
+    slug: "CannabisSleep",
+    hasCustomComponent: true
+  },
+  {
+    id: 'AnxientyRelief',
+    title: "Anxiety Relief Strains: Finding Calm with Cannabis",
     author: "Sarah Rodriguez",
     readTime: "9 min read",
     category: "Health & Benefits",
@@ -312,9 +332,70 @@ export const articles: Article[] = [
     publishDate: "April 10, 2024",
     tags: ["Anxiety", "Strains", "Mental Health"],
     difficulty: "Beginner",
-    views: 12340,
-    rating: 4.7,
-    slug: "anxiety-relief-strains"
+    slug: "AnxientyRelief",
+    hasCustomComponent: true
+  },
+
+  // --- Tools & Equipment ---
+  {
+    id: 'vaporizer2024',
+    title: "Vaporizer Buying Guide 2024: Top Picks & Reviews",
+    author: "Equipment Team",
+    readTime: "13 min read",
+    category: "Tools & Equipment",
+    categorySlug: "tools",
+    image: "/images/weed4.jpg",
+    description: "Our comprehensive review of the best vaporizers available this year, from budget to premium options. Find the perfect device for your needs.",
+    publishDate: "June 5, 2024",
+    tags: ["Vaporizers", "Reviews", "Equipment"],
+    difficulty: "Beginner",
+    slug: "vaporizer2024",
+    hasCustomComponent: true
+  },
+  {
+    id: 'glassvsmetal',
+    title: 'Glass vs Metal Pipes: Which is Right for You?',
+    author: 'Alex Carter',
+    readTime: '9 min read',
+    category: 'Tools & Equipment',
+    categorySlug: 'tools',
+    image: '/images/weed4.jpg',
+    description: 'Compare glass and metal pipes to find the best option for your cannabis consumption, balancing flavor, durability, and portability.',
+    publishDate: 'June 25, 2025',
+    tags: ['Pipes', 'Glass', 'Metal'],
+    difficulty: 'Intermediate',
+    slug: 'glassvsmetal',
+    hasCustomComponent: true
+  },
+  {
+    id: 'growingequipment',
+    title: 'Growing Equipment Reviews: Tools for Success',
+    author: 'Alex Carter',
+    readTime: '11 min read',
+    category: 'Tools & Equipment',
+    categorySlug: 'tools',
+    image: '/images/weed4.jpg',
+    description: 'Review top cannabis growing equipment, from lights to ventilation, to optimize your cultivation setup for maximum yield and quality.',
+    publishDate: 'June 30, 2025',
+    tags: ['Equipment', 'Reviews', 'Growing'],
+    difficulty: 'Intermediate',
+    slug: 'growingequipment',
+    hasCustomComponent: true
+  },
+  {
+    id: 'storagesolutions',
+    title: 'Storage Solutions Guide: Preserving Cannabis Quality',
+    author: 'Alex Carter',
+    readTime: '10 min read',
+    category: 'Tools & Equipment',
+    categorySlug: 'tools',
+    image: '/images/weed4.jpg',
+    description: 'Discover the best storage solutions to maintain cannabis potency, flavor, and freshness, from jars to portable options.',
+    publishDate: 'July 5, 2025',
+    tags: ['Storage', 'Equipment', 'Preservation'],
+    difficulty: 'Intermediate',
+    slug: 'storagesolutions',
+    hasCustomComponent: true
   }
 ]
 

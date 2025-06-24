@@ -56,7 +56,24 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background:
+      radial-gradient(ellipse at 60% 0%, rgba(34,197,94,0.10) 0%, rgba(23,37,23,0.0) 60%),
+      radial-gradient(ellipse at 100% 100%, rgba(245,158,11,0.08) 0%, rgba(23,37,23,0.0) 70%),
+      linear-gradient(135deg, #101c13 0%, #0f172a 100%) !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    position: relative;
   }
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url('/images/noise.png');
+  opacity: 0.12;
 }
 
 /* Custom styles */
@@ -118,4 +135,24 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #16a34a;
+}
+
+/* --- Premium Cannabis Background --- */
+.premium-bg {
+  background:
+    radial-gradient(ellipse at 60% 0%, rgba(34,197,94,0.10) 0%, rgba(23,37,23,0.0) 60%),
+    radial-gradient(ellipse at 100% 100%, rgba(245,158,11,0.08) 0%, rgba(23,37,23,0.0) 70%),
+    linear-gradient(135deg, #101c13 0%, #0f172a 100%) !important;
+  background-attachment: fixed !important;
+  background-size: cover !important;
+  position: relative;
+}
+.premium-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url('/images/noise.png');
+  opacity: 0.12;
 }

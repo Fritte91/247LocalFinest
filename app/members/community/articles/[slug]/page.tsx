@@ -25,6 +25,7 @@ import {
 import { getArticleBySlug, getArticlesByCategory, articleCategories } from "../../data/education"
 import { useApp, type CartItem } from "@/app/hooks/use-app"
 import { MobileNav } from "@/app/components/mobile-nav"
+import ContentManager from "../content-manager"
 
 export default function ArticlePage() {
   const params = useParams<{ slug: string }>()
@@ -39,7 +40,7 @@ export default function ArticlePage() {
   // Premium error/fallback if not found
   if (!article || !category) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-transparent">
         {/* Main Navbar/Header */}
         <header className="border-b border-sage-800 bg-black/95 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
@@ -76,7 +77,7 @@ export default function ArticlePage() {
     .slice(0, 3)
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-transparent">
       {/* Main Navbar/Header */}
       <header className="border-b border-sage-800 bg-black/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
@@ -180,40 +181,9 @@ export default function ArticlePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         </div>
 
-        {/* Article Content Placeholder */}
-        <div className="prose prose-invert max-w-none mb-12">
-          <div className="text-sage-300 leading-relaxed space-y-6">
-            <p className="text-lg">
-              This is a placeholder for the full article content. In a real implementation, 
-              this would contain the complete article text with proper formatting, images, 
-              and interactive elements.
-            </p>
-
-            <h2 className="text-2xl font-display font-bold text-white mt-8 mb-4">Article Content</h2>
-
-            <p>
-              The full article content would be displayed here, including detailed explanations, 
-              step-by-step guides, scientific information, and practical tips related to the topic.
-            </p>
-
-            <div className="bg-gradient-to-r from-sage-950 to-forest-950 border border-sage-800 rounded-lg p-6 my-8">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Beaker className="h-5 w-5 text-forest-400" />
-                Key Takeaways
-              </h3>
-              <ul className="text-sage-300 space-y-2">
-                <li>• Important point about the topic</li>
-                <li>• Practical application or tip</li>
-                <li>• Scientific insight or finding</li>
-                <li>• Best practice recommendation</li>
-              </ul>
-            </div>
-
-            <p>
-              Additional content would continue here, providing comprehensive coverage of the topic 
-              with examples, case studies, and expert insights.
-            </p>
-          </div>
+        {/* Article Content - Now using ContentManager */}
+        <div className="mb-12">
+          <ContentManager article={article} />
         </div>
 
         <Separator className="bg-sage-800 mb-8" />

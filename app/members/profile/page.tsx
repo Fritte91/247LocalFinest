@@ -233,14 +233,14 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
       <header className="border-b border-sage-800 bg-black/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
@@ -371,10 +371,10 @@ export default function ProfilePage() {
                       <Input
                         value={editData.firstName}
                         onChange={(e) => setEditData({ ...editData, firstName: e.target.value })}
-                        className="mt-2 bg-black border-sage-700 text-white"
+                        className="mt-2 bg-transparent border-sage-700 text-white"
                       />
                     ) : (
-                      <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
+                      <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white">
                         {profileData.firstName}
                       </div>
                     )}
@@ -386,10 +386,10 @@ export default function ProfilePage() {
                       <Input
                         value={editData.lastName}
                         onChange={(e) => setEditData({ ...editData, lastName: e.target.value })}
-                        className="mt-2 bg-black border-sage-700 text-white"
+                        className="mt-2 bg-transparent border-sage-700 text-white"
                       />
                     ) : (
-                      <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
+                      <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white">
                         {profileData.lastName}
                       </div>
                     )}
@@ -397,7 +397,7 @@ export default function ProfilePage() {
 
                   <div>
                     <Label className="text-sage-300 font-medium">Email Address</Label>
-                    <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white flex items-center gap-3">
+                    <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white flex items-center gap-3">
                       <Mail className="h-5 w-5 text-sage-400" />
                       {profileData.email}
                     </div>
@@ -412,11 +412,11 @@ export default function ProfilePage() {
                           type="tel"
                           value={editData.phone}
                           onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                          className="pl-12 bg-black border-sage-700 text-white"
+                          className="pl-12 bg-transparent border-sage-700 text-white"
                         />
                       </div>
                     ) : (
-                      <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white flex items-center gap-3">
+                      <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white flex items-center gap-3">
                         <Phone className="h-5 w-5 text-sage-400" />
                         {profileData.phone}
                       </div>
@@ -432,11 +432,11 @@ export default function ProfilePage() {
                           type="date"
                           value={editData.dateOfBirth}
                           onChange={(e) => setEditData({ ...editData, dateOfBirth: e.target.value })}
-                          className="pl-12 bg-black border-sage-700 text-white"
+                          className="pl-12 bg-transparent border-sage-700 text-white"
                         />
                       </div>
                     ) : (
-                      <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white flex items-center gap-3">
+                      <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-sage-400" />
                         {profileData.dateOfBirth}
                       </div>
@@ -445,7 +445,7 @@ export default function ProfilePage() {
 
                   <div>
                     <Label className="text-sage-300 font-medium">Account Type</Label>
-                    <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white flex items-center gap-3">
+                    <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white flex items-center gap-3">
                       <User className="h-5 w-5 text-sage-400" />
                       <div className="flex items-center gap-2">
                         <span className="capitalize">{profileData.buyerType}</span>
@@ -473,10 +473,10 @@ export default function ProfilePage() {
                           ...editData,
                           address: { ...editData.address, street: e.target.value }
                         })}
-                        className="mt-2 bg-black border-sage-700 text-white"
+                        className="mt-2 bg-transparent border-sage-700 text-white"
                       />
                     ) : (
-                      <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
+                      <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white">
                         {profileData.address.street}
                       </div>
                     )}
@@ -492,10 +492,10 @@ export default function ProfilePage() {
                             ...editData,
                             address: { ...editData.address, city: e.target.value }
                           })}
-                          className="mt-2 bg-black border-sage-700 text-white"
+                          className="mt-2 bg-transparent border-sage-700 text-white"
                         />
                       ) : (
-                        <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
+                        <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white">
                           {profileData.address.city}
                         </div>
                       )}
@@ -510,10 +510,10 @@ export default function ProfilePage() {
                             ...editData,
                             address: { ...editData.address, state: e.target.value }
                           })}
-                          className="mt-2 bg-black border-sage-700 text-white"
+                          className="mt-2 bg-transparent border-sage-700 text-white"
                         />
                       ) : (
-                        <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
+                        <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white">
                           {profileData.address.state}
                         </div>
                       )}
@@ -528,10 +528,10 @@ export default function ProfilePage() {
                             ...editData,
                             address: { ...editData.address, zipCode: e.target.value }
                           })}
-                          className="mt-2 bg-black border-sage-700 text-white"
+                          className="mt-2 bg-transparent border-sage-700 text-white"
                         />
                       ) : (
-                        <div className="mt-2 p-3 bg-black border border-sage-700 rounded-md text-white">
+                        <div className="mt-2 p-3 bg-transparent border border-sage-700 rounded-md text-white">
                           {profileData.address.zipCode}
                         </div>
                       )}

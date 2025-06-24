@@ -84,7 +84,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
       <header className="border-b border-sage-800 bg-black/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
