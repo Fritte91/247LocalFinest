@@ -29,9 +29,9 @@ export const events: Event[] = [
       longDescription:
         "The Thailand 420 Festival celebrated cannabis culture with live music, educational panels, product exhibitions, and community activities. Vendors from all over Thailand showcased premium products and cannabis innovations.",
       images: [
-        "/images/weed1.jpg",
-        "/images/weed2.jg",
-        "/images/weed3.jpg"
+        "/images/weed1.webp",
+        "/images/weed2.webp",
+        "/images/weed3.webp"
       ],
       highlights: [
         "Live concert featuring Thai reggae bands",
@@ -55,8 +55,8 @@ export const events: Event[] = [
       longDescription:
         "This three-day event will explore Thailand’s cannabis industry with expert speakers, cultivation seminars, CBD wellness brands, and networking with cultivators and investors from across Southeast Asia.",
       images: [
-        "/images/weed4.jpg",
-        "/images/weed5.jpg"
+        "/images/weed4.webp",
+        "/images/weed5.webp"
       ],
       highlights: [
         "Talk: ‘Cannabis & Thai Traditional Medicine’",
@@ -83,8 +83,8 @@ export const events: Event[] = [
       longDescription:
         "Ganjastic Market brings a fun, beachside vibe to Pattaya with local dispensaries showing off their best buds, infused food vendors, street music, and community growing tips. A great spot for tourists and locals.",
       images: [
-        "/images/weed6.jpg",
-        "/images/weed7.jpg"
+        "/images/weed6.webp",
+        "/images/weed7.webp"
       ],
       highlights: [
         "Live DJ and open mic stage",
@@ -107,7 +107,7 @@ export const events: Event[] = [
         "The largest cannabis business event in Pathum Thani celebrating the launch of PeaceWorld dispensary and cultivation brand.",
       longDescription:
         "Three days of networking, premium flower showcases, educational sessions, and grower spotlights. PeaceWorld introduced their Reserve Collection and signed key partnerships with Thai distributors.",
-      images: ["/images/weed12.jpg"],
+      images: ["/images/weed12.webp"],
       highlights: [
         "Launch of Premium Reserve Collection",
         "Meet-and-greet with local master growers",

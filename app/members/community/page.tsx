@@ -132,7 +132,7 @@ export default function CommunityPage() {
           <div className="space-y-4 md:space-y-6">
             {/* Hero Image */}
             <div className="relative h-48 md:h-64 rounded-lg overflow-hidden">
-              <Image src={event.images[0] || "/placeholder.svg"} alt={event.title} fill className="object-cover" />
+              <Image src={event.images[0] || "/placeholder.svg"} alt={event.title} fill className="object-cover" loading="lazy" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 right-3 md:right-4">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2">
@@ -230,6 +230,7 @@ export default function CommunityPage() {
                         alt={`${event.title} ${index + 2}`}
                         fill
                         className="object-cover hover:scale-105 transition-transform"
+                        loading="lazy"
                       />
                     </div>
                   ))}
@@ -265,6 +266,7 @@ export default function CommunityPage() {
                     alt={`${award.title} Certificate`}
                     fill
                     className="object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                 </div>
@@ -364,6 +366,7 @@ export default function CommunityPage() {
                           alt={`${award.title} Event ${index + 1}`}
                           fill
                           className="object-cover hover:scale-105 transition-transform"
+                          loading="lazy"
                         />
                       </div>
                     ))}
@@ -512,6 +515,7 @@ export default function CommunityPage() {
                             alt={event.title}
                             fill
                             className="object-cover transition-transform group-hover:scale-105"
+                            loading="lazy"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                           <div className="absolute top-3 md:top-4 left-3 md:left-4">
@@ -594,6 +598,7 @@ export default function CommunityPage() {
                       alt={`${award.title} Certificate`}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
@@ -674,11 +679,12 @@ export default function CommunityPage() {
                 </div>
                 <div className="hidden md:block flex-1 relative h-56 w-full max-w-md">
                   <Image
-                    src="/images/indoor.jpg"
+                    src="/images/indoor.webp"
                     alt="Cannabis Knowledge"
                     fill
                     className="object-cover rounded-2xl shadow-2xl border-4 border-forest-700/40"
                     priority
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-2xl" />
                 </div>
@@ -737,6 +743,7 @@ export default function CommunityPage() {
                             alt={article.title}
                             fill
                             className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            loading="lazy"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                           {/* Badges */}
@@ -810,6 +817,7 @@ export default function CommunityPage() {
                     alt="background"
                     fill
                     className="object-cover opacity-10"
+                    loading="lazy"
                   />
                   <div className="md:w-1/3 relative flex-shrink-0">
                     <Image
@@ -818,6 +826,7 @@ export default function CommunityPage() {
                       width={300}
                       height={400}
                       className="rounded-lg object-cover w-full h-full min-h-[300px]"
+                      loading="lazy"
                     />
                     <Badge className="gold-gradient text-white absolute top-3 left-3">Master Grower of the Year</Badge>
                   </div>
@@ -950,6 +959,7 @@ export default function CommunityPage() {
                       alt="background"
                       fill
                       className="object-cover opacity-10"
+                      loading="lazy"
                     />
                     <div className="relative z-10 flex flex-col h-full">
                       <div className="flex justify-between items-start mb-4">

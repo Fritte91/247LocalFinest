@@ -45,6 +45,7 @@ export default function GrowerProfilePage() {
           alt={`${grower.name} cover`}
           fill
           className="object-cover"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
       </div>
@@ -60,6 +61,7 @@ export default function GrowerProfilePage() {
                 width={160}
                 height={160}
                 className="w-full h-full rounded-full object-cover bg-black"
+                loading="lazy"
               />
             </div>
             <Badge className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 gold-gradient text-white">
@@ -142,6 +144,7 @@ export default function GrowerProfilePage() {
                       width={200}
                       height={200}
                       className="w-full h-48 object-cover rounded-lg mb-4"
+                      loading="lazy"
                     />
                     <CardTitle className="text-white font-display">{strain.name}</CardTitle>
                     <CardDescription className="text-forest-400 font-semibold">{strain.type}</CardDescription>

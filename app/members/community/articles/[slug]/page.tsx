@@ -177,7 +177,7 @@ export default function ArticlePage() {
 
         {/* Featured Image */}
         <div className="relative h-64 md:h-96 rounded-lg overflow-hidden mb-8">
-          <Image src={article.image} alt={article.title} fill className="object-cover" />
+          <Image src={article.image} alt={article.title} fill className="object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         </div>
 
@@ -201,6 +201,7 @@ export default function ArticlePage() {
                       alt={relatedArticle.title}
                       fill
                       className="object-cover rounded-t-lg transition-transform group-hover:scale-105"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-t-lg" />
                     <Badge className={`absolute top-2 left-2 text-xs ${

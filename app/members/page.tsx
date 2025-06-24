@@ -241,6 +241,7 @@ export default function MembersShop() {
           width={400}
           height={400}
           className="w-full h-64 object-contain transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
         />
         {product.lowStock && (
           <Badge className="absolute top-3 left-3 bg-gold-600 text-white">
@@ -295,6 +296,7 @@ export default function MembersShop() {
             width={200}
             height={200}
             className="w-full h-full object-contain p-2"
+            loading="lazy"
           />
         </div>
         <div className="p-6 flex-1 flex justify-between">
@@ -391,6 +393,7 @@ export default function MembersShop() {
                     width={400}
                     height={400}
                     className="w-full h-80 object-contain hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
                   {product.lowStock && (
                     <Badge className="absolute top-3 right-3 bg-gold-600 text-white">
@@ -415,6 +418,7 @@ export default function MembersShop() {
                           width={120}
                           height={120}
                           className="w-full h-24 object-contain"
+                          loading="lazy"
                         />
                       </div>
                     ))}

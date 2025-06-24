@@ -135,7 +135,7 @@ export default function ArticlesPage() {
           </div>
           <div className="hidden md:block flex-1 relative h-56 w-full max-w-md">
             <Image
-              src="/images/indoor.jpg"
+              src="/images/indoor.webp"
               alt="Cannabis Knowledge"
               fill
               className="object-cover rounded-2xl shadow-2xl border-4 border-forest-700/40"

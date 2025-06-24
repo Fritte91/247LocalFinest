@@ -693,6 +693,7 @@ export default function AdminDashboard() {
                                   alt={product.name}
                                   fill
                                   className="rounded-md object-cover"
+                                  loading="lazy"
                                 />
                               </div>
                             )}
@@ -1059,6 +1060,7 @@ export default function AdminDashboard() {
                             width={100}
                             height={100}
                             className="rounded-md object-cover w-full h-full"
+                            loading="lazy"
                           />
                         </div>
                       ))}
