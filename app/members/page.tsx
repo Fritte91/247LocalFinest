@@ -261,6 +261,48 @@ export default function MembersShop() {
           <div>
             <h3 className="text-xl font-display text-white truncate mb-1">{product.name}</h3>
             <p className="text-sage-300 capitalize">{product.subcategory || product.category}</p>
+            {/* Responsive tags for strain type, THC, CBD, effect, terpene, flavor */}
+            <div className="mt-2 w-full">
+              {/* On md+ screens, use a 3-column grid for tags; on small screens, use flex-wrap row */}
+              <div className="flex flex-wrap gap-2 md:grid md:grid-cols-3 md:gap-2">
+                {/* Strain type tag (always show if available) */}
+                {product.subcategory && (
+                  <Badge className="capitalize text-xs border-forest-500 text-forest-400" variant="outline">
+                    {product.subcategory}
+                  </Badge>
+                )}
+                {/* THC tag: show on all screens if available */}
+                {typeof product.thc === 'number' && (
+                  <Badge className="text-xs border-gold-500 text-gold-400 hidden xs:inline-block md:inline-block" variant="outline">
+                    THC: {product.thc}%
+                  </Badge>
+                )}
+                {/* CBD tag: show only on md+ screens if available */}
+                {typeof product.cbd === 'number' && (
+                  <Badge className="text-xs border-sage-500 text-sage-400 hidden md:inline-block" variant="outline">
+                    CBD: {product.cbd}%
+                  </Badge>
+                )}
+                {/* Effect tag: show only on md+ screens if available */}
+                {product.effects && product.effects.length > 0 && (
+                  <Badge className="text-xs border-blue-500 text-blue-400 hidden md:inline-block" variant="outline">
+                    {product.effects[0]}
+                  </Badge>
+                )}
+                {/* Terpene tag: show only on md+ screens if available */}
+                {product.terpenes && product.terpenes.length > 0 && (
+                  <Badge className="text-xs border-purple-500 text-purple-400 hidden md:inline-block" variant="outline">
+                    {product.terpenes[0]}
+                  </Badge>
+                )}
+                {/* Flavor tag: show only on md+ screens if available */}
+                {product.flavors && product.flavors.length > 0 && (
+                  <Badge className="text-xs border-pink-500 text-pink-400 hidden md:inline-block" variant="outline">
+                    {product.flavors[0]}
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-1">
             <Star className="h-5 w-5 text-gold-500 fill-current" />
