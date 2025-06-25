@@ -20,6 +20,10 @@ import {
   Brain,
   Flower,
 } from "lucide-react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { MobileNav } from "@/app/components/mobile-nav"
+import ContentManager from "../content-manager"
 
 export default function TerpeneGuide() {
   const terpenes = [
@@ -56,89 +60,121 @@ export default function TerpeneGuide() {
       description: "Also found in lavender, known for its calming and anti-anxiety properties.",
     },
   ]
-
+  // Simulate article data for this static article
+  const article = {
+    category: "Terpenes",
+    categorySlug: "terpenes",
+    difficulty: "Science",
+    title: "Understanding Cannabis Terpenes: The Complete Guide",
+    description: "Discover the aromatic compounds that give cannabis its unique scents and effects. Learn how terpenes work synergistically with cannabinoids to create the entourage effect.",
+    author: "Dr. Sarah Rodriguez",
+    publishDate: "January 20, 2024",
+    readTime: "12 min read",
+    views: 980,
+    rating: 4.8,
+    tags: ["Terpenes", "Science"],
+    image: "/placeholder.svg?height=400&width=800",
+    content: null // not used, content is below
+  }
+  const relatedArticles = [
+    {
+      slug: "myrcenevslimonene",
+      image: "/images/placeholder.svg",
+      title: "Myrcene vs Limonene: Understanding the Differences",
+      description: "Compare two of the most important cannabis terpenes and their unique effects."
+    },
+    {
+      slug: "preservinterpenes",
+      image: "/images/placeholder.svg",
+      title: "Preserving Terpenes",
+      description: "Tips and tricks for keeping your terpenes fresh and potent."
+    },
+    {
+      slug: "entourageeffect",
+      image: "/images/placeholder.svg",
+      title: "The Entourage Effect",
+      description: "How cannabinoids and terpenes work together for unique effects."
+    }
+  ]
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const router = useRouter()
   return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-sage-950 via-forest-950 to-black">
+      {/* Main Navbar/Header */}
       <header className="border-b border-sage-800 bg-black/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
               <Leaf className="h-8 w-8 text-forest-500" />
-              <span className="text-2xl font-display font-bold text-white">GreenCraft</span>
+              <span className="text-2xl md:text-2xl font-display font-bold text-white">247LocalFinest</span>
             </Link>
-            <Link href="/members/community">
-              <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Community
-              </Button>
-            </Link>
+            <MobileNav 
+              mobileMenuOpen={mobileMenuOpen}
+              setMobileMenuOpen={setMobileMenuOpen}
+              cartItemCount={0}
+              currentPath="/members/community/articles"
+            />
           </div>
         </div>
       </header>
-
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Article Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <Badge className="bg-purple-600 text-white">Terpenes</Badge>
-            <Badge variant="outline" className="border-purple-500 text-purple-400">
-              Science
-            </Badge>
+            <Badge className="bg-purple-600 text-white">{article.category}</Badge>
+            <Badge variant="outline" className="border-purple-500 text-purple-400">{article.difficulty}</Badge>
           </div>
-
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4 leading-tight">
-            Understanding Cannabis Terpenes: The Complete Guide
-          </h1>
-
-          <p className="text-xl text-sage-300 mb-6 leading-relaxed">
-            Discover the aromatic compounds that give cannabis its unique scents and effects. Learn how terpenes work
-            synergistically with cannabinoids to create the entourage effect.
-          </p>
-
+          <h1 className="text-3xl md:text-5xl font-display font-bold text-white mb-6 leading-tight">{article.title}</h1>
+          <p className="text-xl text-sage-300 mb-8 leading-relaxed">{article.description}</p>
           {/* Article Meta */}
-          <div className="flex flex-wrap items-center gap-6 mb-6">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
-                <User className="h-5 w-5 text-white" />
+          <div className="flex flex-wrap items-center gap-6 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
+                <User className="h-6 w-6 text-white" />
               </div>
               <div>
-                <div className="text-white font-semibold">Dr. Sarah Rodriguez</div>
+                <div className="text-white font-semibold">{article.author}</div>
                 <div className="text-sage-400 text-sm">Cannabis Scientist</div>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sage-300">
               <Clock className="h-4 w-4" />
-              <span>12 min read</span>
+              <span>{article.readTime}</span>
             </div>
-            <div className="text-sage-400 text-sm">Published: January 20, 2024</div>
+            <div className="flex items-center gap-2 text-sage-300">
+              <span>Published: {article.publishDate}</span>
+            </div>
           </div>
-
           {/* Action Buttons */}
-          <div className="flex gap-3">
-            <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
+          <div className="flex gap-3 mb-8">
+            <Button variant="default" className="bg-purple-700 hover:bg-purple-600 text-white border-none shadow-md">
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>
-            <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
+            <Button variant="default" className="bg-purple-700 hover:bg-purple-600 text-white border-none shadow-md">
               <Bookmark className="h-4 w-4 mr-2" />
               Save
             </Button>
-            <Button variant="outline" className="border-sage-600 text-sage-300 hover:bg-sage-800">
+            <Button variant="default" className="bg-purple-700 hover:bg-purple-600 text-white border-none shadow-md">
               <ThumbsUp className="h-4 w-4 mr-2" />
-              Like (89)
+              Like
             </Button>
           </div>
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {article.tags.map((tag, index) => (
+              <Badge key={index} variant="outline" className="border-purple-500 text-purple-400">{tag}</Badge>
+            ))}
+          </div>
         </div>
-
         {/* Featured Image */}
         <div className="relative h-64 md:h-96 rounded-lg overflow-hidden mb-8">
-          <Image src="/placeholder.svg?height=400&width=800" alt="Cannabis Terpenes" fill className="object-cover" />
+          <Image src={article.image} alt={article.title} fill className="object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         </div>
-
         {/* Article Content */}
-        <div className="prose prose-invert max-w-none">
+        <div className="mb-12">
+          {/* Inline content, not ContentManager for this static article */}
           <div className="text-sage-300 leading-relaxed space-y-6">
             <p className="text-lg">
               Terpenes are aromatic compounds found in many plants, including cannabis. These molecules are responsible
@@ -262,34 +298,32 @@ export default function TerpeneGuide() {
             </div>
           </div>
         </div>
-
-        <Separator className="my-8 bg-sage-800" />
-
-        {/* Author Bio */}
-        <Card className="bg-sage-950 border-sage-800">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
-                <User className="h-8 w-8 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-semibold text-white mb-2">Dr. Sarah Rodriguez</h3>
-                <p className="text-sage-300 mb-4">
-                  Dr. Rodriguez is a cannabis scientist with a PhD in Plant Biology. She specializes in terpene research
-                  and has published numerous papers on the entourage effect and cannabis chemistry.
-                </p>
-                <div className="flex gap-2">
-                  <Badge variant="outline" className="border-purple-500 text-purple-400">
-                    PhD Plant Biology
-                  </Badge>
-                  <Badge variant="outline" className="border-emerald-500 text-emerald-400">
-                    Terpene Specialist
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Separator className="bg-sage-800 mb-8" />
+        {/* Related Articles */}
+        <div className="mb-8">
+          <h3 className="text-2xl font-display font-bold text-white mb-6">Related Articles</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedArticles.map((relatedArticle, index) => (
+              <Link key={index} href={`/members/community/articles/${relatedArticle.slug}`} className="group">
+                <Card className="bg-sage-950 border-sage-800 hover-lift cursor-pointer group">
+                  <div className="relative h-40">
+                    <Image
+                      src={relatedArticle.image}
+                      alt={relatedArticle.title}
+                      fill
+                      className="object-cover rounded-t-lg"
+                    />
+                    <Badge className="absolute top-2 left-2 bg-purple-600 text-white text-xs">{article.category}</Badge>
+                  </div>
+                  <CardContent className="p-4">
+                    <h4 className="text-white font-semibold mb-2">{relatedArticle.title}</h4>
+                    <p className="text-sage-300 text-sm">{relatedArticle.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
