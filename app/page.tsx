@@ -93,9 +93,21 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative py-32 px-4 bg-gradient-to-b from-sage-950 via-sage-900 to-black overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-grid"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-forest-500/10 to-transparent"></div>
-        <div className="container mx-auto text-center relative">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src="/images/hero-video3.mp4" type="video/mp4" />
+        </video>
+        {/* Overlay for readability */}
+        <div className="absolute inset-0 bg-black/60 z-10"></div>
+        <div className="absolute inset-0 opacity-20 bg-grid z-20"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-forest-500/10 to-transparent z-20"></div>
+        <div className="container mx-auto text-center relative z-30">
           <div className="max-w-4xl mx-auto">
             <h1 
               className="text-6xl md:text-8xl font-display font-bold text-white mb-6 leading-tight animate-fade-in-down"
